@@ -1,0 +1,9 @@
+[MASTER]
+# allow pylint to parse c-libraries
+extension-pkg-whitelist=numpy,scipy,graphics, rgbmatrix, rgbmatrix.graphics, matplotlib.cm
+
+[FORMAT]
+max-line-length=100
+good-names=i,j,k,x,y,z,xi,yi,xt,xy,xj,yj,ri,N,r,b,g,a, dx, dy,_a
+method-rgx=[a-z_][a-z0-9_]{2,50}$
+function-rgx=[a-z_][a-z0-9_]{2,50}$
