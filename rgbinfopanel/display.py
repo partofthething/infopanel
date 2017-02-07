@@ -12,7 +12,7 @@ from rgbmatrix import graphics
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import yaml
 
-from rgbinfopanel import mqtt, scenes, helpers
+from rgbinfopanel import mqtt, scenes, helpers, colors
 
 FRAME_DELAY_S = 0.005
 
@@ -28,12 +28,11 @@ class Display(threading.Thread):
         self.live_data = live_data
         self.canvas = self.matrix.CreateFrameCanvas()
         self._stop = threading.Event()
-        self.scenes = [scenes.Giraffes(self), scenes.Welcome(self), scenes.Traffic(self)]
+        self.scenes = [  # cenes.FullImage(self, '/home/pi/led-infopanel/flag.ppm'),
+                        scenes.Giraffes(self), scenes.Welcome(self), scenes.Traffic(self)]
         self.durations_in_s = [15, 5, 10]  # favor some scenes over others time-wise
         self.scene = None
         self._change_scene()
-        self.x, self.y = 0, 0
-        self._scroll_x = None
 
     def run(self):
         """
@@ -62,34 +61,22 @@ class Display(threading.Thread):
     def _change_scene(self):
         """Switch to another scene, maybe."""
         choice = random.randint(0, len(self.scenes) - 1)
+        if self.scene:
+            self.scene.active = False  # scene can mark itself active, if it wants.
         self.scene = self.scenes[choice]
         self.interval = self.durations_in_s[choice]
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""
-        self.canvas.Clear()
+        self.scene.clear()
         self.scene.draw_frame()
-        self.reset_cursor()
-        self.canvas = self.matrix.SwapOnVSync(self.canvas)
-
-    def reset_cursor(self):
-        """Put cursor at 0,0."""
-        self.x, self.y = 0, 0
-
-    def _draw_text_lines(self, lines):
-        self.y += self.line_height
-        x0 = self.x
-        for info in lines:
-            self.x = x0
-            for text, color in info:
-                self.x += graphics.DrawText(self.canvas, self.font, self.x, self.y, color, text)
-            self.y += self.line_height
+        self.scene.buffer()
 
     def rainbow_text(self, canvas, font, x, y, text, box=True):
         """Make rainbow text."""
         x0 = x
         for i, char in enumerate(text):
-            color = helpers.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
+            color = colors.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
             x += graphics.DrawText(canvas, font, x, y, color, char)
         if box:
             self.draw_box(canvas, x0 - 2, y - font.height + 2, x, y + 2)

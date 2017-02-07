@@ -1,15 +1,57 @@
-"""Scenes."""
+"""Scenes. One of these will be active at any given time."""
+
 
 from rgbmatrix import graphics
 from rgbinfopanel import sprites, helpers
 from rgbinfopanel import colors
+from PIL import Image
 
 class Scene(object):
     def __init__(self, disp):
         self.disp = disp
+        self.common_sprites = []
+        self.active = False
+
+        # build some data sources that are available to all sprites.
+        self.i5 = sprites.Duration()
+        self.i5.add('I90', lambda : int(self.disp.live_data['travel_time_i90']))
+        self.wa520 = sprites.Duration()
+        self.wa520.add('520', lambda: int(self.disp.live_data['travel_time_520']))
+        self.daily_high = sprites.Temperature()
+        self.daily_high.add('H', lambda: float(self.disp.live_data['daily_high']))
+        self.daily_low = sprites.Temperature()
+        self.daily_low.add('L', lambda: float(self.disp.live_data['daily_low']))
+        self.current = sprites.Temperature()
+        self.current.add('C', lambda: float(self.disp.live_data['current_temp']))
+        self.common_sprites.extend([self.i5, self.wa520, self.daily_high,
+                                    self.daily_low, self.current])
+
+    def clear(self):
+        self.disp.canvas.Clear()
 
     def draw_frame(self):
         raise NotImplementedError
+
+    def buffer(self):
+        self.disp.canvas = self.disp.matrix.SwapOnVSync(self.disp.canvas)
+
+
+class FullImage(Scene):
+    """
+    Full screen bitmap image.
+
+    Notes
+    -----
+    Currently, this crashes the library every once in a while. Unstable!!
+    """
+    def __init__(self, disp, fname):
+        Scene.__init__(self, disp)
+        self.image = Image.open(fname)
+        self.image.thumbnail((self.disp.matrix.width, self.disp.matrix.height), Image.ANTIALIAS)
+        self.image = self.image.convert('RGB')
+
+    def draw_frame(self):
+        self.disp.canvas.SetImage(self.image)
 
 
 class Welcome(Scene):
@@ -26,27 +68,24 @@ class Traffic(Scene):
     """A scene with some traffic info."""
     def __init__(self, disp):
         Scene.__init__(self, disp)
-        self.i5 = sprites.Duration(0, self.disp.font.height)
-        self.wa520 = sprites.Duration(0, self.disp.font.height * 2)
-        self.update_traffic()
+        self.i5.y = self.disp.font.height
+        self.wa520.y = self.disp.font.height * 2
+        self.daily_high.x = 33
+        self.daily_high.y = self.disp.font.height
+        self.daily_low.y = self.disp.font.height * 2
+        self.daily_low.x = 33
+
         self.vehicle = sprites.FancyText(0, self.disp.font.height * 3, 'VROOM!!')
         self.scroll = sprites.FancyText(disp.canvas.width, self.disp.font.height * 4)
         self.scroll.add('HECK ', colors.GREEN)
-        self.scroll.add('YEAH', colors.RED)
+        self.scroll.add('YEAH', colors.BLUE)
         self.scroll.dx = -1
         self.scroll.ticks_per_movement = 1
 
     def draw_frame(self):
-        for sprite in [self.i5, self.wa520, self.vehicle, self.scroll]:
+        for sprite in [self.i5, self.wa520, self.daily_high, self.daily_low,
+                       self.vehicle, self.scroll]:
             sprite.render(self.disp.canvas)
-
-    def update_traffic(self):
-        # slow if you put it every frame.
-        self.i5.clear()
-        self.i5.add('I90', lambda : int(self.disp.live_data['travel_time_i90']))
-        self.wa520.clear()
-        self.wa520.add('520', lambda: int(self.disp.live_data['travel_time_520']))
-
 
 
 class Giraffes(Scene):
@@ -60,15 +99,9 @@ class Giraffes(Scene):
         self.giraffes[2].ticks_per_movement = 2
         self.giraffes[2].y = 10
         for giraffe in self.giraffes:
-            giraffe.phrases.extend([self.i5_time, self.wa520_time])
+            giraffe.phrases.extend(3 * self.common_sprites)
 
         self.plants = [sprites.Plant(x, y) for (x, y) in [(30, 10), (10, 20), (40, 5)]]
-
-    def i5_time(self):
-        return 'I90: {}'.format(self.disp.live_data['travel_time_i90'])
-
-    def wa520_time(self):
-        return '520: {}'.format(self.disp.live_data['travel_time_520'])
 
     def draw_frame(self):
         for plant in self.plants:

@@ -1,7 +1,8 @@
-"""Sprites."""
+"""There are multiple sprites in any given scene."""
 
 import random
 
+from matplotlib import cm
 from rgbmatrix import graphics
 
 from rgbinfopanel import helpers, colors
@@ -28,7 +29,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self._ticks = 0  # to allow slower changes of frames, could probably be itertools.cycle
         self.ticks_per_frame = 1
         self.ticks_per_movement = 1
-        self.ticks_per_phrase = random.randint(10, 100)
+        self.ticks_per_phrase = 200
+        self.min_ticks_per_phrase = 100
+        self.max_ticks_per_phrase = 400
         self.pallete = {1: (255, 255, 255)}
         self.dx, self.dy = 0, 0
         self.font = helpers.load_font('5x8.bdf')
@@ -76,18 +79,31 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
     def check_movement(self):
         """Move if there have been enough ticks, and wrap."""
+        if not self.dx and not self.dy:
+            return
+
         if not self._ticks % self.ticks_per_movement:
             self.move()
 
         if self.x > self.canvas.width and self.dx > 0:
-            self.x = 0
+            if not self._maybe_flip():
+                self.x = 0 - self.width
         elif self.x + self.width < 0 and self.dx < 0:
-            self.x = self.canvas.width
+            if not self._maybe_flip():
+                self.x = self.canvas.width
 
         if self.y > self.canvas.height and self.dy > 0:
             self.y = 0
         elif self.y + self.height < 0 and self.dy < 0:
             self.y = self.canvas.height
+
+    def _maybe_flip(self):
+        multiplier = random.choice([1, -1])
+        self.dx *= multiplier
+        if multiplier == -1:
+            self.flip_horizontal()
+            return True
+        return False
 
     def check_tick_bounds(self):
         """
@@ -107,14 +123,17 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         """Change the phrase the thing is saying."""
         if not self._ticks % self.ticks_per_phrase:
             text_src = random.choice(self.phrases)
+            min_ticks = self.min_ticks_per_phrase
             if callable(text_src):
-                # allow functions to be passed to get more dynamic messages.
+                # allow callable helpers for current date, time, etc.
                 text_src = text_src()
-                min_ticks = 40  # let live data stay a bit longer
-            else:
-                min_ticks = 20
+                min_ticks *= 2
+            elif isinstance(self.text, Sprite):
+                # allow nested sprites to be passed to get extra-fancy (traffic)
+                min_ticks *= 2  # let live data stay a bit longer
+
             self.text = text_src
-            self.ticks_per_phrase = random.randint(min_ticks, 150)
+            self.ticks_per_phrase = random.randint(min_ticks, self.max_ticks_per_phrase)
 
     def move(self):
         """Move around on the screen."""
@@ -138,8 +157,15 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         # you could try to make text a FancyText object but then you have to double-
         # render all the motion an wrapping. It's too slow so this is just dumb text.
         if self.text:
-            graphics.DrawText(canvas, self.font, x + self.width + 1, self.y + self.font.height,
-                              colors.GREEN, self.text)
+            xtext = x + self.width + 1
+            ytext = self.y + self.font.height
+            if isinstance(self.text, Sprite):
+                self.text.x = xtext
+                self.text.y = ytext
+                self.text.render(canvas)
+            else:
+                graphics.DrawText(canvas, self.font, xtext, ytext,
+                                  colors.GREEN, self.text)
 
 
 class FancyText(Sprite):
@@ -156,6 +182,9 @@ class FancyText(Sprite):
     @property
     def width(self):
         return self._width
+
+    def flip_horizontal(self):
+        Sprite.flip_horizontal(self)
 
     @property
     def height(self):
@@ -181,27 +210,31 @@ class FancyText(Sprite):
         for text, color in self._text:
             if callable(text):
                 text = str(text())  # for dynamic values
-            x += graphics.DrawText(self.canvas, self.font, self.x + x, self.y, color, text)
+            x += graphics.DrawText(canvas, self.font, self.x + x, self.y, color, text)
         self._width = x
 
 class Duration(FancyText):
     """Text that represents a duration with a green-to-red color."""
 
-    def __init__(self, x, y, text=None):
+    def __init__(self, x=0, y=0, text=None):
         FancyText.__init__(self, x, y, text)
         self.last_val = None
         self.color = None
-        self.good_val = 13.0
-        self.bad_val = 23.0
+        self.low_val = 13.0
+        self.high_val = 23.0
         self.value = None
+        self.cmap = colors.GREEN_RED
+        self.label_fmt = '{}:'
+        self.val_fmt = '{}'
 
     def add(self, label, value):
-        FancyText.add(self, '{}: '.format(label), colors.YELLOW)
+        FancyText.add(self, self.label_fmt.format(label), colors.YELLOW)
         val = value() if callable(value) else value
-        color = helpers.interpolate_color(val, self.good_val, self.bad_val)
+        color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
         self.last_val = val
         self.basis = (label, value)
-        FancyText.add(self, value, color)
+        self.value = value
+        FancyText.add(self, self.val_fmt.format(val), color)
 
     def update_color(self):
         """Update the interpolated color if value changed."""
@@ -214,6 +247,15 @@ class Duration(FancyText):
     def render(self, canvas):
         self.update_color()
         FancyText.render(self, canvas)
+
+class Temperature(Duration):
+    def __init__(self, x=0, y=0, text=None):
+        Duration.__init__(self, x, y, text)
+        self.low_val = -15
+        self.high_val = 28.0
+        self.cmap = cm.jet
+        self.label_fmt = '{}'
+        self.val_fmt = '{:> .1f}'
 
 
 class Giraffe(Sprite):
