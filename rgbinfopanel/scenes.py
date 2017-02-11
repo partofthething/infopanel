@@ -1,112 +1,112 @@
 """Scenes. One of these will be active at any given time."""
 
+import itertools
+import time
+import inspect
+import sys
+import copy
 
-from rgbmatrix import graphics
+import PIL
+
 from rgbinfopanel import sprites, helpers
-from rgbinfopanel import colors
-from PIL import Image
+
 
 class Scene(object):
-    def __init__(self, disp):
-        self.disp = disp
-        self.common_sprites = []
-        self.active = False
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.sprites = []
 
-        # build some data sources that are available to all sprites.
-        self.i5 = sprites.Duration()
-        self.i5.add('I90', lambda : int(self.disp.live_data['travel_time_i90']))
-        self.wa520 = sprites.Duration()
-        self.wa520.add('520', lambda: int(self.disp.live_data['travel_time_520']))
-        self.daily_high = sprites.Temperature()
-        self.daily_high.add('H', lambda: float(self.disp.live_data['daily_high']))
-        self.daily_low = sprites.Temperature()
-        self.daily_low.add('L', lambda: float(self.disp.live_data['daily_low']))
-        self.current = sprites.Temperature()
-        self.current.add('C', lambda: float(self.disp.live_data['current_temp']))
-        self.common_sprites.extend([self.i5, self.wa520, self.daily_high,
-                                    self.daily_low, self.current])
+    def draw_frame(self, display):
+        for sprite in self.sprites:
+            sprite.render(display)
 
-    def clear(self):
-        self.disp.canvas.Clear()
+class Blank(Scene):
+    """Just a blank screen."""
+    def draw_frame(self, display):
+        time.sleep(1.0)
 
-    def draw_frame(self):
-        raise NotImplementedError
-
-    def buffer(self):
-        self.disp.canvas = self.disp.matrix.SwapOnVSync(self.disp.canvas)
-
-
-class FullImage(Scene):
-    """
-    Full screen bitmap image.
-
-    Notes
-    -----
-    Currently, this crashes the library every once in a while. Unstable!!
-    """
-    def __init__(self, disp, fname):
-        Scene.__init__(self, disp)
-        self.image = Image.open(fname)
-        self.image.thumbnail((self.disp.matrix.width, self.disp.matrix.height), Image.ANTIALIAS)
+class Image(Scene):
+    """Full screen bitmap image."""
+    def __init__(self, width, height, path):
+        Scene.__init__(self, width, height)
+        self.image = PIL.Image.open(path)
+        self.image.thumbnail((self.width, self.height), PIL.Image.ANTIALIAS)
         self.image = self.image.convert('RGB')
 
-    def draw_frame(self):
-        self.disp.canvas.SetImage(self.image)
+    def draw_frame(self, display):
+        display.set_image(self.image)
+
+
+class AnimatedGif(Scene):
+    """Full screen animated gif."""
+    def __init__(self, width, height, path):
+        Scene.__init__(self, width, height)
+        self.image = PIL.Image.open(path)
+
+        frames = [frame.copy() for frame in PIL.ImageSequence.Iterator(self.image)]
+        [frame.thumbnail((self.width, self.height),
+                         PIL.Image.ANTIALIAS) for frame in frames]
+        self.frames = itertools.cycle([frame.convert('RGB') for frame in frames])
+        self.delay = 0.05
+
+    def draw_frame(self, display):
+        display.set_image(next(self.frames))
+        time.sleep(self.delay)
 
 
 class Welcome(Scene):
     """Just a welcome message."""
-    def __init__(self, disp):
-        Scene.__init__(self, disp)
+    def __init__(self, width, height):
+        Scene.__init__(self, width, height)
         self.font = helpers.load_font('9x15B.bdf')
 
-    def draw_frame(self):
-        self.disp.rainbow_text(self.disp.canvas, self.font, 5, 20, 'HELLO!')
-
-
-class Traffic(Scene):
-    """A scene with some traffic info."""
-    def __init__(self, disp):
-        Scene.__init__(self, disp)
-        self.i5.y = self.disp.font.height
-        self.wa520.y = self.disp.font.height * 2
-        self.daily_high.x = 33
-        self.daily_high.y = self.disp.font.height
-        self.daily_low.y = self.disp.font.height * 2
-        self.daily_low.x = 33
-
-        self.vehicle = sprites.FancyText(0, self.disp.font.height * 3, 'VROOM!!')
-        self.scroll = sprites.FancyText(disp.canvas.width, self.disp.font.height * 4)
-        self.scroll.add('HECK ', colors.GREEN)
-        self.scroll.add('YEAH', colors.BLUE)
-        self.scroll.dx = -1
-        self.scroll.ticks_per_movement = 1
-
-    def draw_frame(self):
-        for sprite in [self.i5, self.wa520, self.daily_high, self.daily_low,
-                       self.vehicle, self.scroll]:
-            sprite.render(self.disp.canvas)
+    def draw_frame(self, display):
+        display.rainbow_text(self.font, 5, 20, 'HELLO!')
 
 
 class Giraffes(Scene):
     """A field of giraffes saying things."""
-    def __init__(self, disp):
-        Scene.__init__(self, disp)
-        self.giraffes = [sprites.Giraffe() for _i in range(3)]
-        self.giraffes[1].flip_horizontal()
-        self.giraffes[1].dx = -1
-        self.giraffes[1].y = 18
-        self.giraffes[2].ticks_per_movement = 2
-        self.giraffes[2].y = 10
-        for giraffe in self.giraffes:
-            giraffe.phrases.extend(3 * self.common_sprites)
+    def __init__(self, width, height):
+        Scene.__init__(self, width, height)
+        self.sprites = [sprites.Giraffe() for _i in range(3)]
+        self.sprites[1].flip_horizontal()
+        self.sprites[1].dx = -1
+        self.sprites[1].y = 18
+        self.sprites[2].ticks_per_movement = 2
+        self.sprites[2].y = 10
+#         for giraffe in self.sprites:
+#             giraffe.phrases.extend(3 * self.sprites)
+        self.sprites.extend([sprites.Plant(x, y) for (x, y) in [(30, 10), (10, 20), (40, 5)]])
 
-        self.plants = [sprites.Plant(x, y) for (x, y) in [(30, 10), (10, 20), (40, 5)]]
+def scene_factory(width, height, conf, sprites):
+    """Build scenes from config."""
+    scenes = {}
+    for name, scene_data in conf.items():
+        for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
+            if scene_data['type'] == cls_name:
+                break
+        else:
+            raise ValueError('{} is invalid active_scene'.format(name))
+        del scene_data['type']
+        if 'sprites' in scene_data:
+            sprites_to_add = scene_data.pop('sprites')
+        else:
+            sprites_to_add = []
+        scene = cls(width, height, **scene_data)
+        for sprite_data in sprites_to_add:
+            for spritename, spriteparams in sprite_data.items():  # should be only one
+                sprite = copy.copy(sprites[spritename])  # each active_scene gets independent copies of the sprites
+                for param, val in spriteparams.items():
+                    if not hasattr(sprite, param):
+                        raise ValueError('Invalid sprite parameter for {}: {}'.format(sprite, param))
+                    setattr(sprite, param, val)
+            scene.sprites.append(sprite)
 
-    def draw_frame(self):
-        for plant in self.plants:
-            plant.render(self.disp.canvas)
-        for giraffe in self.giraffes:
-            giraffe.render(self.disp.canvas)
+        for sprite in scene.sprites:
+            sprite.max_x = width
+            sprite.max_y = height
 
+        scenes[name] = scene
+    return scenes
 

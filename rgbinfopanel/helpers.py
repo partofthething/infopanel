@@ -3,9 +3,9 @@
 import datetime
 import os
 
-from rgbmatrix import graphics
 
 FONTS = {}
+FONT_DIR = None
 
 def day_of_week():
     """Get day of week, like MONDAY."""
@@ -23,8 +23,7 @@ def date():
     return now.strftime('%b %d').upper()
 
 def load_font(name):
-    # s.path.join(os.path.dirname(graphics.__file__), '..', '..', 'fonts')
-    FONT_DIR = '/home/pi/gpio/rpi-rgb-led-matrix/fonts'
+    from rgbmatrix import graphics
     global FONTS
     font = FONTS.get(name)
     if font is None:
