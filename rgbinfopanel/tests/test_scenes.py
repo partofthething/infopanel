@@ -1,14 +1,14 @@
 """Test Scenes."""
 import unittest
 
-from rgbinfopanel import scenes, driver
-from rgbinfopanel.tests import test_sprites
+from rgbinfopanel import scenes, sprites
+from rgbinfopanel.tests import test_sprites, load_test_config
 
 class TestScenes(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        driver.apply_global_config({'global':{'font_dir':'/home/nick/codes/rpi-rgb-led-matrix/fonts'}})
+        cls.conf = load_test_config()
 
     def setUp(self):
         sprites = test_sprites.build_test_sprites()
@@ -20,6 +20,10 @@ class TestScenes(unittest.TestCase):
         self.assertEqual(len(scene.sprites), 2)
         self.assertEqual(scene.sprites[0].x, 0)
         self.assertEqual(scene.sprites[0].max_x, 64)
+
+    def test_all(self):
+        existing_sprites = sprites.sprite_factory(self.conf['sprites'], None)
+        scenes.scene_factory(64, 32, self.conf['scenes'], existing_sprites)
 
 
 def build_test_scenes(sprites):

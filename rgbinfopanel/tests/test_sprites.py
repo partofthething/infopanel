@@ -1,14 +1,14 @@
 """Tests for sprites."""
 import unittest
 
-from rgbinfopanel import sprites, driver, data
-
+from rgbinfopanel import sprites, data
+from rgbinfopanel.tests import load_test_config
 
 class TestSprite(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        driver.apply_global_config({'global':{'font_dir':'/home/nick/codes/rpi-rgb-led-matrix/fonts'}})
+        cls.conf = load_test_config()
 
     def setUp(self):
         self.sprites = build_test_sprites()
@@ -21,6 +21,21 @@ class TestSprite(unittest.TestCase):
         self.assertEqual(self.sprites['I90'].value(), 10.0)
         self.sprites['I90'].data_source['travel_time_i90'] = 11.0
         self.assertEqual(self.sprites['I90'].value(), 11.0)
+
+class TestTemperature(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.conf = load_test_config()
+
+    def setUp(self):
+        """Build temperature sprites from config."""
+        self.sprites = sprites.sprite_factory(self.conf['sprites'], None)
+
+    def test_bounds_as_input(self):
+        """Make sure configured low_val gets applied correctly."""
+        temp = self.sprites['daily_high']
+        self.assertEqual(temp.low_val, -15.0)
 
 
 def build_test_sprites():

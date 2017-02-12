@@ -6,6 +6,7 @@ import inspect
 import sys
 import copy
 import logging
+import os
 
 import PIL
 
@@ -39,9 +40,9 @@ class Image(Scene):
     """Full screen bitmap image."""
     def __init__(self, width, height, path):
         Scene.__init__(self, width, height)
-        self.image = PIL.Image.open(path)
-        self.image.thumbnail((self.width, self.height), PIL.Image.ANTIALIAS)
-        self.image = self.image.convert('RGB')
+        with PIL.Image.open(os.path.expandvars(path)) as image:
+            image.thumbnail((self.width, self.height), PIL.Image.ANTIALIAS)
+            self.image = image.convert('RGB')
 
     def draw_frame(self, display):
         display.set_image(self.image)
@@ -51,7 +52,7 @@ class AnimatedGif(Scene):
     """Full screen animated gif."""
     def __init__(self, width, height, path):
         Scene.__init__(self, width, height)
-        self.image = PIL.Image.open(path)
+        self.image = PIL.Image.open(os.path.expandvars(path))
 
         frames = [frame.copy() for frame in PIL.ImageSequence.Iterator(self.image)]
         for frame in frames:

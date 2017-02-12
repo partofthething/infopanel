@@ -5,6 +5,7 @@ import argparse
 import time
 import random
 import logging
+import os
 
 from rgbinfopanel import mqtt, scenes, config, display, sprites, data
 
@@ -145,7 +146,7 @@ def driver_factory(disp, data_src, conf):
 def apply_global_config(conf):
     """Apply config items that are global in nature."""
     from rgbinfopanel import helpers
-    helpers.FONT_DIR = conf['global']['font_dir']
+    helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
 
 def run():
     """Run the screen."""

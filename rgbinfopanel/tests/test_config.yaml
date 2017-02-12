@@ -1,0 +1,167 @@
+mqtt:
+  broker: test.com
+  port: 8883
+  client_id: screen
+  keepalive: 60
+  username: user
+  password: pass
+  certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
+  protocol: 3.1
+  topic: house/screen/#
+
+RGBMatrix:
+  led-rows: 32
+  led-chain: 2
+  led-parallel: 1
+  led-pwm-bits: 11
+  led-brightness: 100
+  led-gpio-mapping: adafruit-hat-pwm
+  led-scan-mode: 1
+  led-pwm-lsb-nanoseconds: 130
+  led-show-refresh: false
+  led-slowdown-gpio: 0
+  led-no-hardware-pulse: false
+  
+sprites: 
+  I90:
+      type: Duration    
+      label: I90
+      low_val: 13.0
+      high_val: 23.0
+      data_label: travel_time_i90
+  WA520:
+      type: Duration
+      label: 520
+      low_val: 13.0
+      high_val: 23.0
+      data_label: travel_time_520
+  daily_high: 
+      type: Temperature
+      label: H
+      low_val: -15
+      high_val: 28
+      data_label: daily_high
+  daily_low: 
+      type: Temperature
+      label: L
+      low_val: -15
+      high_val: 28
+      data_label: daily_low
+  current: 
+      type: Temperature
+      label: C
+      low_val: -15
+      high_val: 28
+      data_label: current_temp
+  vehicle:
+      type: FancyText
+      text: VROOM!
+  scroll:
+      type: FancyText
+      text: OH YEAH!
+      dx: -1
+      ticks_per_movement: 1      
+  giraffe2:
+      type: Sprite
+      ticks_per_frame: 3
+      dx: 1
+      pallete: 
+         1: 
+            - 255
+            - 0
+            - 0  
+         2: 
+            - 0
+            - 0
+            - 255  
+      frames:
+        - 00010
+          00011
+          00020
+          00010
+          00020
+          00010
+          00020
+          00110
+          01210
+          12120
+          10010
+          10001
+          10001
+
+        - 00100
+          00110
+          00020
+          00010
+          00020
+          00010
+          00020
+          00110
+          01210
+          12120
+          10010
+          10010
+          01100
+
+scenes:
+  flag: 
+      type: Image
+      path: $HOME/.infopanel/flag.ppm
+  cat: 
+      type: AnimatedGif
+      path: $HOME/.infopanel/rainbow_cat.gif
+  hypnotoad:
+      type: AnimatedGif
+      path: $HOME/.infopanel/hypnotoad.gif
+  giraffes:
+      type: Giraffes
+      extra_phrases: 
+        - I90
+        - WA520
+        - daily_high
+        - daily_low
+        - current
+      extra_phrase_frequency: 4
+
+  welcome:
+      type: Welcome
+  traffic:
+      type: Scene
+      sprites: 
+        - I90: 
+            x: 0
+            y: 8
+        - WA520:
+            x: 0
+            y: 16
+        - daily_high:
+            x: 33
+            y: 8
+        - daily_low: 
+            x: 33
+            y: 16
+        - current:
+            x: 33 
+            y: 24
+        - vehicle: 
+            x: 0 
+            y: 24
+        - scroll: 
+            x: 0 
+            y: 32
+  giraffe2:
+     type: Scene
+     sprites: 
+       - giraffe2:
+           y: 10
+
+modes: 
+  morning: 
+    - giraffes:
+        duration: 15
+    - traffic:
+        duration: 10 
+
+global:
+    font_dir: $RPI_RGB_LED_MATRIX/fonts
+        
