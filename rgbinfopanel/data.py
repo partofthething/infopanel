@@ -1,4 +1,4 @@
-"""Info data"""
+"""Input data that might come over MQTT or whatever."""
 
 import collections
 

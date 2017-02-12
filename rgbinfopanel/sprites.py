@@ -1,7 +1,6 @@
 """There are multiple sprites in any given scene."""
 
 import random
-import os
 import inspect
 import sys
 
@@ -24,7 +23,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
     frames = [[[]]]
 
-    def __init__(self, x=0, y=0, ticks_per_frame=1, ticks_per_movement=1,
+    def __init__(self, x=0, y=0, ticks_per_frame=1, ticks_per_movement=1,  # pylint: disable=too-many-arguments
                  ticks_per_phrase=200, dx=0, dy=0, text='', data_source=None):
         self.x, self.y = x, y
         self.max_x, self.max_y = None, None
@@ -168,7 +167,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             if isinstance(self.text, Sprite):
                 self.text.x = xtext
                 self.text.y = ytext
-                self.text.render(display)
+                self.text.render(display)  # pylint:disable=no-member
             else:
                 display.text(self.font, xtext, ytext, colors.GREEN, self.text)
 
@@ -217,19 +216,19 @@ class FancyText(Sprite):
             x += display.text(self.font, self.x + x, self.y, color, text)
         self._width = x
 
-class Duration(FancyText):
+class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
     """Text that represents a duration with a green-to-red color."""
 
-    def __init__(self, label=None, low=13.0, high=23.0, data=None, **kwargs):
+    def __init__(self, label=None, low=13.0, high=23.0, data_label=None, **kwargs):
         FancyText.__init__(self, **kwargs)
         self.last_val = None
         self.color = None
         self.low_val = low
         self.high_val = high
         self.label = label
-        if data:
+        if data_label:
             # make function to get live data off of object
-            self.value = lambda: self._convert_data(self.data_source[data])
+            self.value = lambda: self._convert_data(self.data_source[data_label])
         else:
             self.value = None
         self.cmap = colors.GREEN_RED
@@ -237,7 +236,7 @@ class Duration(FancyText):
         self.val_fmt = '{}'
         self._make_text()
 
-    def _convert_data(self, val):
+    def _convert_data(self, val):  # pylint: disable=no-self-use
         return int(val)
 
     def _make_text(self):
@@ -261,9 +260,10 @@ class Duration(FancyText):
         FancyText.render(self, canvas)
 
 class Temperature(Duration):
-    def __init__(self, low=-15.0, high=28.0, **kwargs):
-        Duration.__init__(self, **kwargs)
-        self.cmap = cm.jet
+    """A temperature with color dependent on a high and low bound."""
+    def __init__(self, low=-15.0, high=28.0, data_label=None, **kwargs):
+        Duration.__init__(self, low=low, high=high, data_label=data_label, **kwargs)
+        self.cmap = cm.jet  # pylint: disable=no-member
         self.label_fmt = '{}'
         self.val_fmt = '{:> .1f}'
 
@@ -282,7 +282,6 @@ class Giraffe(Sprite):
         self.phrases = [''] * 6 + GOOFY_EXCLAMATIONS + [helpers.day_of_week,
                                                         helpers.time_now,
                                                         helpers.date]
-
         self.frames = [[[0, 0, 0, 1, 0],
                         [0, 0, 0, 1, 1],
                         [0, 0, 0, 1, 0],
@@ -344,7 +343,6 @@ def sprite_factory(config, data_source):
         else:
             raise ValueError('{} is invalid sprite'.format(name))
         del sprite_data['type']
-        sprite = cls(data_source=data_source, **sprite_data)
+        sprite = cls(data_source=data_source, **sprite_data)  # pylint:disable=undefined-loop-variable
         sprites[name] = sprite
     return sprites
-

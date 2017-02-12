@@ -13,35 +13,36 @@ class Display(object):
 
     This is a common interface to whatever kind of display you have.
     """
-    def __init__(self):
-        pass
-
     def text(self, font, x, y, color, text):
         """Render text in a font to a place on the screen in a certain color."""
         raise NotImplementedError
 
     @property
     def width(self):
+        """Width of the display in pixels."""
         raise NotImplementedError
 
     @property
     def height(self):
+        """Height of the display in pixels."""
         raise NotImplementedError
 
     def set_pixel(self, x, y, r, g, b):
+        """Set a pixel to a color."""
         raise NotImplementedError
 
     def set_image(self, image):
+        """Apply an image to the screen."""
         raise NotImplementedError
 
     def rainbow_text(self, font, x, y, text, box=True):
         """Make rainbow text."""
-        x0 = x
+        x_orig = x
         for i, char in enumerate(text):
             color = colors.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
             x += self.text(font, x, y, color, char)
         if box:
-            self.draw_box(x0 - 2, y - font.height + 2, x, y + 2)
+            self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
 
     def draw_box(self, xmin, ymin, xmax, ymax):
         """Don't use PIL because it blanks.  NOTE: Use graphics.DrawLine"""
@@ -53,35 +54,42 @@ class Display(object):
             self.set_pixel(xmin, y, 0, 200, 0)
             self.set_pixel(xmax, y, 0, 200, 0)
 
-class RGBMatrix_Display(Display):
+class RGBMatrixDisplay(Display):
     """An RGB LED Matrix running off of the rgbmatrix library."""
     def __init__(self, matrix):
+        Display.__init__(self)
         self._matrix = matrix
         self.canvas = matrix.CreateFrameCanvas()
 
     @property
     def width(self):
+        """Width of the display in pixels."""
         return self._matrix.width
 
     @property
     def height(self):
+        """Height of the display in pixels."""
         return self._matrix.height
 
     def text(self, font, x, y, color, text):
+        """Render text in a font to a place on the screen in a certain color."""
         return graphics.DrawText(self.canvas, font, x, y, color, text)
 
     def set_pixel(self, x, y, red, green, blue):
+        """Set a pixel to a color."""
         self.canvas.SetPixel(x, y, red, green, blue)
 
     def set_image(self, image):
+        """Apply an image to the screen."""
         self.canvas.SetImage(image)
 
     def clear(self):
+        """Clear the canvas."""
         self.canvas.Clear()
 
     def buffer(self):
+        """Swap the off-display canvas/buffer with the on-display one."""
         self.canvas = self._matrix.SwapOnVSync(self.canvas)
-
 
 
 def rgbmatrix_options_factory(config):
@@ -108,7 +116,7 @@ def display_factory(config):
     if 'RGBMatrix' in config:
         options = rgbmatrix_options_factory(config['RGBMatrix'])
         matrix = RGBMatrix(options=options)
-        display = RGBMatrix_Display(matrix)
+        display = RGBMatrixDisplay(matrix)
     else:
         raise ValueError('Unknown Display options. Check config file.')
     return display

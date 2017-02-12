@@ -1,4 +1,4 @@
-"""""The infopanel."""
+"""The infopanel driver. This is the main controller for the system."""
 
 import threading
 import argparse
@@ -7,11 +7,10 @@ import random
 
 from rgbinfopanel import mqtt, scenes, config, display, sprites, data
 
-
 FRAME_DELAY_S = 0.005
 BLANK = 'blank'
 
-class Driver(object):
+class Driver(object):  # pylint: disable=too-many-instance-attributes
     """Main controller for the infopanel."""
     def __init__(self, disp, data_source):
         print('Starting InfoPanel.')
@@ -56,13 +55,16 @@ class Driver(object):
 
     @property
     def suspended(self):
+        """True if the system is in suspend mode."""
         return self.scene_sequence[0] is self._blank
 
     def _change_scene(self):
         """Switch to another active_scene, maybe."""
         self._check_for_command()
-        self.display.clear()
-        self.active_scene = random.choice(self.scene_sequence)
+        new_scene = random.choice(self.scene_sequence)
+        if new_scene is not self.active_scene:
+            self.display.clear()
+        self.active_scene = new_scene
         self.interval = self.durations_in_s[self.active_scene]
 
     def _check_for_command(self):
@@ -82,18 +84,20 @@ class Driver(object):
         self.durations_in_s = {self._blank: 2}
 
     def resume(self):
+        """Resume from suspend."""
         print('Resuming')
         self.apply_mode(self._mode)
 
     def apply_mode(self, mode):
+        """Apply a different sequence of scenes with different durations."""
         self._mode = mode
-        if mode is 'all':  # hard-coded default mode
+        if mode == 'all':  # hard-coded default mode
             self.run_all_scenes()
             return
-        self.scene_sequence = []
         if mode not in self.modes:
             print('Invalid mode: {}'.format(mode))
             return
+        self.scene_sequence = []
         for scene_name, duration in self.modes[mode]:
             scene = self.scenes[scene_name]
             self.scene_sequence.append(scene)
@@ -108,7 +112,7 @@ class Driver(object):
     def run_all_scenes(self, duration=5):
         """Make mode with all defined scenes running uniformly."""
         self.scene_sequence = []
-        for _scenename, scene in self.scenes.items():
+        for scene in self.scenes.values():
             self.scene_sequence.append(scene)
             self.durations_in_s[scene] = duration
         self.active_scene = self.scene_sequence[0]
@@ -133,6 +137,7 @@ def driver_factory(disp, data_src, conf):
     return driver
 
 def apply_global_config(conf):
+    """Apply config items that are global in nature."""
     from rgbinfopanel import helpers
     helpers.FONT_DIR = conf['global']['font_dir']
 
@@ -149,7 +154,7 @@ def run():
     datasrc = data.InputData()
     infopanel = driver_factory(disp, datasrc, conf)
 
-    client = mqtt.MQTT_Client(datasrc)
+    client = mqtt.MQTTClient(datasrc, conf['mqtt'])
     client.start()
     try:
         # infopanel.start()  # multiple threads

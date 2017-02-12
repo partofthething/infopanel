@@ -25,7 +25,7 @@ class TestSprite(unittest.TestCase):
 
 def build_test_sprites():
     DURATION_CONFIG = {'I90':{'type':'Duration', 'label':'I90', 'low':13.0,
-                     'high':25.0, 'data':'travel_time_i90' }}
+                     'high':25.0, 'data_label':'travel_time_i90' }}
     datasrc = data.InputData()
     datasrc['travel_time_i90'] = 10.0
     return sprites.sprite_factory(DURATION_CONFIG, datasrc)
