@@ -1,8 +1,13 @@
 """Displays to present stuff."""
 
 from matplotlib import cm
-from rgbmatrix import graphics
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+try:
+    from rgbmatrix import graphics
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+except ImportError:
+    print('No RGB Matrix library found. Cannot use that display.')
+    rgbmatrix = None
+
 
 from infopanel import colors
 
@@ -13,7 +18,7 @@ class Display(object):
 
     This is a common interface to whatever kind of display you have.
     """
-    def text(self, font, x, y, color, text):
+    def text(self, font, x, y, red, green, blue, text):
         """Render text in a font to a place on the screen in a certain color."""
         raise NotImplementedError
 
@@ -39,8 +44,8 @@ class Display(object):
         """Make rainbow text."""
         x_orig = x
         for i, char in enumerate(text):
-            color = colors.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
-            x += self.text(font, x, y, color, char)
+            r, g, b = colors.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
+            x += self.text(font, x, y, r, g, b, char)
         if box:
             self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
 
@@ -53,6 +58,7 @@ class Display(object):
         for y in range(ymin, ymax + 1):
             self.set_pixel(xmin, y, 0, 200, 0)
             self.set_pixel(xmax, y, 0, 200, 0)
+
 
 class RGBMatrixDisplay(Display):
     """An RGB LED Matrix running off of the rgbmatrix library."""
@@ -71,8 +77,9 @@ class RGBMatrixDisplay(Display):
         """Height of the display in pixels."""
         return self._matrix.height
 
-    def text(self, font, x, y, color, text):
+    def text(self, font, x, y, red, green, blue, text):
         """Render text in a font to a place on the screen in a certain color."""
+        color = graphics.Color(red, green, blue)  # may require caching
         return graphics.DrawText(self.canvas, font, x, y, color, text)
 
     def set_pixel(self, x, y, red, green, blue):
@@ -113,7 +120,10 @@ def rgbmatrix_options_factory(config):
 
 def display_factory(config):
     """Build a display based on config settings."""
+
     if 'RGBMatrix' in config:
+        if rgbmatrix is None:
+            return Display()
         options = rgbmatrix_options_factory(config['RGBMatrix'])
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)

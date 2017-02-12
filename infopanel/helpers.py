@@ -23,12 +23,18 @@ def date():
     return now.strftime('%b %d').upper()
 
 def load_font(name):
-    from rgbmatrix import graphics
+
+
     global FONTS
     font = FONTS.get(name)
+
     if font is None:
         # cache it
-        font = graphics.Font()
-        font.LoadFont(os.path.join(FONT_DIR, name))  # slow.
+        try:
+            from rgbmatrix import graphics
+            font = graphics.Font()
+            font.LoadFont(os.path.join(FONT_DIR, name))  # slow.
+        except ImportError:
+            font = None
         FONTS[name] = font
     return font

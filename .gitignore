@@ -2,3 +2,8 @@
 .pydevproject
 .externalToolBuilders
 *.pyc
+.tox
+__pycache__
+/build*
+infopanel.egg*
+.cache

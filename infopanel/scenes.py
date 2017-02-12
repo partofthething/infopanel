@@ -8,7 +8,8 @@ import copy
 import logging
 import os
 
-import PIL
+from PIL import Image as PILImage
+from PIL import ImageSequence
 
 from infopanel import sprites, helpers
 
@@ -40,8 +41,8 @@ class Image(Scene):
     """Full screen bitmap image."""
     def __init__(self, width, height, path):
         Scene.__init__(self, width, height)
-        with PIL.Image.open(os.path.expandvars(path)) as image:
-            image.thumbnail((self.width, self.height), PIL.Image.ANTIALIAS)
+        with PILImage.open(os.path.expandvars(path)) as image:
+            image.thumbnail((self.width, self.height), PILImage.ANTIALIAS)
             self.image = image.convert('RGB')
 
     def draw_frame(self, display):
@@ -52,11 +53,11 @@ class AnimatedGif(Scene):
     """Full screen animated gif."""
     def __init__(self, width, height, path):
         Scene.__init__(self, width, height)
-        self.image = PIL.Image.open(os.path.expandvars(path))
+        self.image = PILImage.open(os.path.expandvars(path))
 
-        frames = [frame.copy() for frame in PIL.ImageSequence.Iterator(self.image)]
+        frames = [frame.copy() for frame in ImageSequence.Iterator(self.image)]
         for frame in frames:
-            frame.thumbnail((self.width, self.height), PIL.Image.ANTIALIAS)
+            frame.thumbnail((self.width, self.height), PILImage.ANTIALIAS)
         self.frames = itertools.cycle([frame.convert('RGB') for frame in frames])
         self.delay = 0.05
 

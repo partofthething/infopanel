@@ -37,7 +37,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                        vol.Optional('y', default=0): int,
                        vol.Optional('font_name', default='5x8.bdf'): str,
                        vol.Optional('phrases', default=['']): list,
-                       vol.Optional('pallete', default={1: [255, 255, 255]}): PALLETE_SCHEMA,
+                       vol.Optional('pallete', default={1: [255, 255, 255],
+                                                        'text':[0, 255, 0],
+                                                        'label':[255, 255, 0]}): PALLETE_SCHEMA,
                        vol.Optional('frames', default=None): FRAMES_SCHEMA,
                        vol.Optional('text', default=''): str,
                        })
@@ -223,7 +225,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                 self.text.y = ytext
                 self.text.render(display)  # pylint:disable=no-member
             else:
-                display.text(self.font, xtext, ytext, colors.GREEN, self.text)
+                red, green, blue = pallete['text']
+                display.text(self.font, xtext, ytext, red, green, blue, self.text)
 
 
 class FancyText(Sprite):
@@ -238,7 +241,7 @@ class FancyText(Sprite):
     def apply_config(self, conf):
         conf = Sprite.apply_config(self, conf)
         if self.text:
-            self.add(self.text, colors.GREEN)
+            self.add(self.text, self.pallete['text'])
         return conf
 
     @property
@@ -253,7 +256,11 @@ class FancyText(Sprite):
         return self.font.height
 
     def add(self, text, color):
-        """Add a section of text with a constant color."""
+        """
+        Add a section of text with a constant color.
+
+        Color should be a r,g,b tuple.
+        """
         self._text.append((text, color))
 
     def clear(self):
@@ -268,10 +275,11 @@ class FancyText(Sprite):
         """
         x = 0
         dummy = self.frame  # to tick the ticks.
-        for text, color in self._text:
+        for text, rgb in self._text:
             if callable(text):
                 text = str(text())  # for dynamic values
-            x += display.text(self.font, self.x + x, self.y, color, text)
+            r, g, b = rgb
+            x += display.text(self.font, self.x + x, self.y, r, g, b, text)
         self._width = x
 
 class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
@@ -310,7 +318,7 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
 
     def _make_text(self):
         """Make elements of a duration with label and text."""
-        FancyText.add(self, self.label_fmt.format(self.label), colors.YELLOW)
+        FancyText.add(self, self.label_fmt.format(self.label), colors.rgb_from_name('yellow'))
         val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
         color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
         self.last_val = val
@@ -356,7 +364,7 @@ class Giraffe(Sprite):
     def __init__(self):
         Sprite.__init__(self)
         self.ticks_per_frame = 3
-        self.pallete = {1: (255, 255, 0)}
+        self.pallete = {1: (255, 255, 0), 'text':[0, 255, 0]}
         self.dx = 1
         self.phrases = [''] * 6 + GOOFY_EXCLAMATIONS + [helpers.day_of_week,
                                                         helpers.time_now,
