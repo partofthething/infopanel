@@ -5,11 +5,14 @@ import time
 import inspect
 import sys
 import copy
+import logging
 
 import PIL
 
 from rgbinfopanel import sprites, helpers
 
+
+LOG = logging.getLogger(__name__)
 
 class Scene(object):
     """A single screen's worth of sprites."""
@@ -84,7 +87,12 @@ class Giraffes(Scene):
         self.sprites[1].y = 18
         self.sprites[2].ticks_per_movement = 2
         self.sprites[2].y = 10
-        self.sprites.extend([sprites.Plant(x, y) for (x, y) in [(30, 10), (10, 20), (40, 5)]])
+        for (x, y) in [(30, 10), (10, 20), (40, 5)]:
+            plant = sprites.Plant()
+            plant.x, plant.y = x, y
+            self.sprites.append(plant)
+        for sprite in self.sprites:
+            sprite.apply_config({})  # set defaults on everything else.
 
     def apply_config(self, conf, existing_sprites):
         """Apply Giraffe-specific configuration entries."""

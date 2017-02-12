@@ -4,16 +4,20 @@ import threading
 import argparse
 import time
 import random
+import logging
 
 from rgbinfopanel import mqtt, scenes, config, display, sprites, data
 
 FRAME_DELAY_S = 0.005
 BLANK = 'blank'
 
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 class Driver(object):  # pylint: disable=too-many-instance-attributes
     """Main controller for the infopanel."""
     def __init__(self, disp, data_source):
-        print('Starting InfoPanel.')
+        LOG.info('Starting InfoPanel.')
         self.display = disp
         self.data_source = data_source
         self.sprites = {}  # name: sprite
@@ -64,6 +68,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         new_scene = random.choice(self.scene_sequence)
         if new_scene is not self.active_scene:
             self.display.clear()
+            LOG.debug('Switching to new scene: %s', new_scene)
         self.active_scene = new_scene
         self.interval = self.durations_in_s[self.active_scene]
 
@@ -79,23 +84,24 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
     def suspend(self):
         """Turn off until the suspend command goes away (externally controlled)."""
-        print('Suspending.')
+        LOG.info('Suspending.')
         self.scene_sequence = [self._blank]
         self.durations_in_s = {self._blank: 2}
 
     def resume(self):
         """Resume from suspend."""
-        print('Resuming')
+        LOG.info('Resuming')
         self.apply_mode(self._mode)
 
     def apply_mode(self, mode):
         """Apply a different sequence of scenes with different durations."""
         self._mode = mode
+        LOG.info('Applying mode: %s', mode)
         if mode == 'all':  # hard-coded default mode
             self.run_all_scenes()
             return
         if mode not in self.modes:
-            print('Invalid mode: {}'.format(mode))
+            LOG.error('Invalid mode: %s', mode)
             return
         self.scene_sequence = []
         for scene_name, duration in self.modes[mode]:
@@ -116,6 +122,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             self.scene_sequence.append(scene)
             self.durations_in_s[scene] = duration
         self.active_scene = self.scene_sequence[0]
+        LOG.debug('Running all scenes, starting with %s.', self.active_scene)
 
 
 def driver_factory(disp, data_src, conf):
@@ -131,7 +138,6 @@ def driver_factory(disp, data_src, conf):
             for scene_name, durationinfo in sceneinfo.items():
                 driver.modes[mode_name].append((scene_name, durationinfo['duration']))
 
-    print(driver.modes)
     driver.run_all_scenes()
 
     return driver
@@ -161,7 +167,7 @@ def run():
         infopanel.run()  # main thread
     finally:
         client.stop()
-        print('Quitting.')
+        LOG.info('Quitting.')
 
 if __name__ == "__main__":
     run()

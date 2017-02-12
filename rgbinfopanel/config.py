@@ -19,10 +19,7 @@ MQTT = vol.Schema({'broker':str,
                    vol.Optional('protocol', default='3.1'): str,
                    'topic':str})
 
-SPRITE = vol.Schema({'type': vol.Any(*SPRITE_NAMES),
-                     vol.Optional('dx', default=0): int,
-                     vol.Optional('ticks_per_frame', default=1): int,
-                     vol.Optional('ticks_per_movement', default=1): int},
+SPRITE = vol.Schema({'type': vol.Any(*SPRITE_NAMES)},
                     extra=vol.ALLOW_EXTRA)
 SPRITES = vol.Schema({str: SPRITE})
 

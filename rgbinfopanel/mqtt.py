@@ -1,6 +1,10 @@
 """MQTT client to get data into the display from some data source."""
 
+import logging
+
 import paho.mqtt.client as mqtt
+
+LOG = logging.getLogger(__name__)
 
 class MQTTClient(object):
     """MQTT Client."""
@@ -12,19 +16,19 @@ class MQTTClient(object):
 
     def on_connect(self, client, userdata, flags, rc):  # pylint: disable=unused-argument, invalid-name
         """Callback for when MQTT server connects."""
-        print("Connected with result code " + str(rc))
+        LOG.info("Connected with result code %d", rc)
         client.subscribe(self.conf['topic'])  # subscribe in case we get disconnected
 
     def on_message(self, client, userdata, msg):  # pylint: disable=unused-argument
         """Callback for when MQTT receives a message."""
-        print(msg.topic + " " + str(msg.payload))
+        LOG.debug("%s %s", msg.topic, str(msg.payload))
         key = msg.topic.split('/')[-1]
         self._data_container[key] = msg.payload
 
     def start(self):
         """Connect to the MQTT server."""
         conf = self.conf
-        print('Connecting to MQTT server at {}'.format(conf['broker']))
+        LOG.info('Connecting to MQTT server at %s', conf['broker'])
         self._client = mqtt.Client(conf['client_id'], protocol=conf['protocol'])
         self._client.on_connect = self.on_connect
         self._client.on_message = self.on_message
