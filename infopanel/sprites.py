@@ -8,7 +8,7 @@ import logging
 from matplotlib import cm
 import voluptuous as vol
 
-from rgbinfopanel import helpers, colors, data
+from infopanel import helpers, colors, data
 
 
 MAX_TICKS = 10000
@@ -61,6 +61,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             data_source = data.InputData()
         self.data_source = data_source
         self.frames = None
+        self._frame_delta = 0
 
     def apply_config(self, conf):
         """Validate and apply configuration to this sprite."""
@@ -90,7 +91,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                     row.append(int(char))
                 frame.append(row)
             new_frames.append(frame)
-        LOG.debug('Built frames for %s: \n%s', self, str(new_frames))
+        LOG.info('Built custom frames for %s.', self)
         self.frames = new_frames
 
     def flip_horizontal(self):
@@ -130,7 +131,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
     def update_frame_num(self):
         """Change frame num when there have been enough ticks."""
         if not self._ticks % self.ticks_per_frame:
-            self._frame_num += 1
+            self._frame_num += self._frame_delta
 
     def check_movement(self):
         """Move if there have been enough ticks, and wrap."""
@@ -171,8 +172,12 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
     def check_frame_bounds(self):
         """Roll back to first frame if all have been seen."""
-        if self._frame_num >= len(self.frames):
-            self._frame_num = 0
+        if len(self.frames[0][0]) == 0:
+            self._frame_delta = 0
+        elif self._frame_num == len(self.frames) - 1:
+            self._frame_delta = -1
+        elif self._frame_num == 0:
+            self._frame_delta = 1
 
     def update_phrase(self):
         """Change the phrase the thing is saying."""
@@ -412,8 +417,12 @@ def sprite_factory(config, data_source):
     sprites = {}
     for name, sprite_conf in config.items():
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
-            if sprite_conf['type'] == cls_name:
-                break
+            try:
+                if sprite_conf['type'] == cls_name:
+                    break
+            except KeyError:
+                LOG.error("%s", name)
+                raise
         else:
             raise ValueError('{} is invalid sprite'.format(name))
         del sprite_conf['type']

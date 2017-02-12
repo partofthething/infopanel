@@ -1,4 +1,4 @@
 """Entry point."""
 
-from rgbinfopanel import driver
+from infopanel import driver
 driver.run()

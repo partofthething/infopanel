@@ -1,8 +1,8 @@
 """Tests for sprites."""
 import unittest
 
-from rgbinfopanel import sprites, data
-from rgbinfopanel.tests import load_test_config
+from infopanel import sprites, data
+from infopanel.tests import load_test_config
 
 class TestSprite(unittest.TestCase):
 
@@ -24,18 +24,22 @@ class TestSprite(unittest.TestCase):
 
 class TestTemperature(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.conf = load_test_config()
 
     def setUp(self):
         """Build temperature sprites from config."""
+        self.conf = load_test_config()
         self.sprites = sprites.sprite_factory(self.conf['sprites'], None)
 
     def test_bounds_as_input(self):
         """Make sure configured low_val gets applied correctly."""
         temp = self.sprites['daily_high']
         self.assertEqual(temp.low_val, -15.0)
+
+    def test_scroll_frames(self):
+        """Make sure frames are dealt with for non-animated things."""
+        temp = self.sprites['scroll']
+        self.assertEqual(temp._frame_delta, 0)
+        self.assertEqual(len(temp.frames[0][0]), 0)
 
 
 def build_test_sprites():

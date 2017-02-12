@@ -5,7 +5,7 @@ import inspect
 import yaml
 import voluptuous as vol
 
-from rgbinfopanel import sprites, scenes
+from infopanel import sprites, scenes
 
 SPRITE_NAMES = [name for name, value in inspect.getmembers(sprites, inspect.isclass)]
 

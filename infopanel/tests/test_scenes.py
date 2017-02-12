@@ -1,8 +1,8 @@
 """Test Scenes."""
 import unittest
 
-from rgbinfopanel import scenes, sprites
-from rgbinfopanel.tests import test_sprites, load_test_config
+from infopanel import scenes, sprites
+from infopanel.tests import test_sprites, load_test_config
 
 class TestScenes(unittest.TestCase):
 

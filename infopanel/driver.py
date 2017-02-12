@@ -7,7 +7,7 @@ import random
 import logging
 import os
 
-from rgbinfopanel import mqtt, scenes, config, display, sprites, data
+from infopanel import mqtt, scenes, config, display, sprites, data
 
 FRAME_DELAY_S = 0.005
 BLANK = 'blank'
@@ -23,9 +23,9 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.data_source = data_source
         self.sprites = {}  # name: sprite
         self.scenes = {}  # name: scene
-        self.durations_in_s = {}  # scene: seconds
         # separate blank so not in randomizer
         self._blank = scenes.Blank(self.display.width, self.display.height)
+        self.durations_in_s = {self._blank: 2.0}  # scene: seconds
         self.scene_sequence = []
 
         self._mode = 'all'
@@ -87,7 +87,6 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         """Turn off until the suspend command goes away (externally controlled)."""
         LOG.info('Suspending.')
         self.scene_sequence = [self._blank]
-        self.durations_in_s = {self._blank: 2}
 
     def resume(self):
         """Resume from suspend."""
@@ -95,20 +94,29 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.apply_mode(self._mode)
 
     def apply_mode(self, mode):
-        """Apply a different sequence of scenes with different durations."""
+        """
+        Apply a different sequence of scenes with different durations.
+
+        If the mode is the name of a scene, set that scene instead.
+        """
         self._mode = mode
         LOG.info('Applying mode: %s', mode)
         if mode == 'all':  # hard-coded default mode
             self.run_all_scenes()
             return
         if mode not in self.modes:
-            LOG.error('Invalid mode: %s', mode)
-            return
-        self.scene_sequence = []
-        for scene_name, duration in self.modes[mode]:
-            scene = self.scenes[scene_name]
-            self.scene_sequence.append(scene)
-            self.durations_in_s[scene] = duration
+            if mode in self.scenes:
+                self.scene_sequence = [self.scenes[mode]]
+            else:
+                LOG.error('Invalid mode: %s', mode)
+                return
+        else:
+            self.scene_sequence = []
+            for scene_name, duration in self.modes[mode]:
+                scene = self.scenes[scene_name]
+                self.scene_sequence.append(scene)
+                self.durations_in_s[scene] = duration
+
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""
@@ -145,7 +153,7 @@ def driver_factory(disp, data_src, conf):
 
 def apply_global_config(conf):
     """Apply config items that are global in nature."""
-    from rgbinfopanel import helpers
+    from infopanel import helpers
     helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
 
 def run():

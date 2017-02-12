@@ -10,7 +10,7 @@ import os
 
 import PIL
 
-from rgbinfopanel import sprites, helpers
+from infopanel import sprites, helpers
 
 
 LOG = logging.getLogger(__name__)

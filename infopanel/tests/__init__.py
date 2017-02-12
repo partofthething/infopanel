@@ -1,7 +1,7 @@
 """Universal test stuff."""
 import os
 
-from rgbinfopanel import driver, config
+from infopanel import driver, config
 
 TEST_ROOT = os.path.dirname(os.path.abspath(__file__))
 

@@ -4,7 +4,7 @@ from matplotlib import cm
 from rgbmatrix import graphics
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-from rgbinfopanel import colors
+from infopanel import colors
 
 
 class Display(object):
