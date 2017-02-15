@@ -176,9 +176,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         """Roll back to first frame if all have been seen."""
         if len(self.frames[0][0]) == 0:
             self._frame_delta = 0
-        elif self._frame_num == len(self.frames) - 1:
+        elif self._frame_num == len(self.frames) - 1 and self._frame_delta:
             self._frame_delta = -1
-        elif self._frame_num == 0:
+        elif self._frame_num == 0 and self._frame_delta:
             self._frame_delta = 1
 
     def update_phrase(self):

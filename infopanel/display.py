@@ -6,7 +6,7 @@ try:
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 except ImportError:
     print('No RGB Matrix library found. Cannot use that display.')
-    rgbmatrix = None
+    RGBMatrix = None
 
 
 from infopanel import colors
@@ -122,7 +122,7 @@ def display_factory(config):
     """Build a display based on config settings."""
 
     if 'RGBMatrix' in config:
-        if rgbmatrix is None:
+        if RGBMatrix is None:
             return Display()
         options = rgbmatrix_options_factory(config['RGBMatrix'])
         matrix = RGBMatrix(options=options)
