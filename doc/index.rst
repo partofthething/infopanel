@@ -12,6 +12,7 @@ an RGB LED Matrix Screen (though other screens are envisioned to be supported in
 
     <video autoplay loop> 
         <source src="_static/traffic.webm" type="video/webm">
+        <source src="_static/traffic.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video> 
 
@@ -96,6 +97,7 @@ Here are some giraffes as an example:
 
     <video autoplay loop> 
         <source src="_static/giraffes.webm" type="video/webm">
+        <source src="_static/giraffes.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video> 
 
@@ -224,6 +226,7 @@ Here is the horses scene:
 
     <video autoplay loop> 
         <source src="_static/horses.webm" type="video/webm">
+        <source src="_static/horses.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video> 
 
