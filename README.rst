@@ -11,7 +11,7 @@ particular, it is suitable for displaying various scenes on a RGB LED Matrix.
 
 The code for this project, as well as the issue tracker, etc. is
 `hosted on GitHub <https://github.com/partofthething/infopanel>`_.
-The documentation is hosted at http://partofthething.com/infopanel.
+The full documentation is hosted at https://partofthething.com/infopanel.
 
 What is it?
 -----------
@@ -19,6 +19,13 @@ Infopanel is useful as a component in a home automation system, as a fun decorat
 or even as a system monitoring display. It can show you weather, traffic conditions, 
 jokes, basically anything you can send to it. It gets data from MQTT, which 
 can come from all sorts of sources. 
+
+.. raw:: html
+
+    <video autoplay loop> 
+        <source src="https://partofthething.com/infopanel/_static/horses.webm" type="video/webm">
+    Your browser does not support the video tag.
+    </video> 
 
 It works with only one display so far, but more will be added if desired:
 

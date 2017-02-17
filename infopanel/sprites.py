@@ -4,6 +4,7 @@ import random
 import inspect
 import sys
 import logging
+import datetime
 
 from matplotlib import cm
 import voluptuous as vol
@@ -66,7 +67,11 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self._frame_delta = 0
 
     def apply_config(self, conf):
-        """Validate and apply configuration to this sprite."""
+        """
+        Validate and apply configuration to this sprite.
+
+        Generally, each config item becomes a instance attribute.
+        """
         conf = self.CONF(conf)
         for key, val in conf.items():
             if not hasattr(self, key):
@@ -421,6 +426,51 @@ class Plant(Sprite):
         self.ticks_per_frame = random.randint(10, 20)
         self.pallete = {1: (0, 240, 0),
                         2: (165, 42, 42)}
+
+class Reddit(FancyText):
+    """The titles of some top posts in various subreddits."""
+    CONF = FancyText.CONF.extend({'client_id': str,
+                                  'client_secret': str,
+                                  vol.Optional('user_agent', default='infopanel'): str,
+                                  vol.Optional('subreddits',
+                                               default=['worldnews', 'politics', 'news']):list,
+                                  vol.Optional('num_headlines', default=5): int,
+                                  vol.Optional('update_minutes', default=5): int,
+                                  })
+    def __init__(self, *args, **kwargs):
+        FancyText.__init__(self, *args, **kwargs)
+        self._praw = None
+        self.subreddits = None
+        self.num_headlines = None
+        self.update_minutes = None
+        self._last_update_time = datetime.datetime.now()
+
+    def apply_config(self, conf):
+        conf = FancyText.apply_config(self, conf)
+        import praw
+        self._praw = praw.Reddit(client_id=conf['client_id'],
+                                 client_secret=conf['client_secret'],
+                                 user_agent=conf['user_agent'])
+        self.update_headlines()
+        return conf
+
+    def update_headlines(self):
+        """Update sprite text based on current subreddit contents."""
+        self.clear()
+        for headline in self._praw.subreddit('+'.join(self.subreddits)).hot(limit=self.num_headlines):
+            self.add(headline.title + 10 * ' ', self.pallete['text'])
+
+    def update_phrase(self):
+        """Occasionally update the headlines."""
+        if not self._ticks % self.ticks_per_phrase:
+            now = datetime.datetime.now()
+            if now - self._last_update_time > datetime.timedelta(minutes=self.update_minutes):
+                self.update_headlines()
+                self._last_update_time = now
+
+    def _maybe_flip(self):
+        return False
+
 
 def sprite_factory(config, data_source):
     """Build sprites from config file."""
