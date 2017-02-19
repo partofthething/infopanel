@@ -33,6 +33,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.active_scene = None
         self._stop = threading.Event()
         self.interval = 2
+        self._brightness = 100  # just used to detect changes in data. Should be handeled on data.
 
     def run(self):
         """
@@ -82,6 +83,13 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
         if self.data_source['mode'] != self._mode:
             self.apply_mode(self.data_source['mode'])
+
+        if self.data_source['brightness'] != self._brightness:
+            try:
+                self._brightness = int(self.data_source['brightness'])
+            except:
+                self._brightness = 100
+            self.display.brightness = self._brightness
 
     def suspend(self):
         """Turn off until the suspend command goes away (externally controlled)."""
@@ -156,14 +164,16 @@ def apply_global_config(conf):
     from infopanel import helpers
     helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
 
-def run():
+def run(conf_file=None):
     """Run the screen."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", action="store", help="Point to a YAML configuration file.",
-                        default='/etc/infopanel/infopanel.yaml')
+    if not conf_file:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--config", action="store", help="Point to a YAML configuration file.",
+                            default='/etc/infopanel/infopanel.yaml')
 
-    args = parser.parse_args()
-    conf = config.load_config_yaml(args.config)
+        args = parser.parse_args()
+        conf_file = args.config
+    conf = config.load_config_yaml(conf_file)
     apply_global_config(conf)
     disp = display.display_factory(conf)
     datasrc = data.InputData()

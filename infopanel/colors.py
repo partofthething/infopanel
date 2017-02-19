@@ -2,9 +2,6 @@
 
 import matplotlib.colors as mcolor
 
-
-
-
 # make a custom colormap that goes from pure green to pure red.
 GREEN_RED = mcolor.LinearSegmentedColormap('green_red', {'red':   ((0.0, 0.0, 0.0),
                                                             (1.0, 1.0, 1.0)),

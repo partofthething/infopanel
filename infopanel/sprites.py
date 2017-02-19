@@ -321,15 +321,23 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
         return conf
 
     def _convert_data(self, val):  # pylint: disable=no-self-use
-        return int(val)
+        try:
+            return int(val)
+        except ValueError:
+            return None
 
     def _make_text(self):
         """Make elements of a duration with label and text."""
         FancyText.add(self, self.label_fmt.format(self.label), colors.rgb_from_name('yellow'))
         val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
-        color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
+        if val is None:
+            color = colors.interpolate_color(self.low_val, self.low_val, self.high_val, self.cmap)
+            text = 'N/A'
+        else:
+            color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
+            text = self.val_fmt.format(val)
         self.last_val = val
-        FancyText.add(self, self.val_fmt.format(val), color)
+        FancyText.add(self, text, color)
 
     def update_color(self):
         """Update the interpolated color if value changed."""
@@ -362,7 +370,11 @@ class Temperature(Duration):
         self.val_fmt = '{:> .1f}'
 
     def _convert_data(self, val):
-        return float(val)
+        try:
+            return float(val)
+        except ValueError:
+            # can happen if data is 'unknown' or something.
+            return None
 
 
 class Giraffe(Sprite):

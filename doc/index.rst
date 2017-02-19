@@ -8,6 +8,8 @@ an RGB LED Matrix Screen (though other screens are envisioned to be supported in
 
 .. Note: I'm storing the videos as symlinks instead of embedding them in this repo. 
 
+Here is an example with live travel times over I-90 and WA-520, as well as high, low, and current temperature (in celcius). (The headlines are coming directly from reddit, as you'll see below). 
+
 .. raw:: html
 
     <video autoplay loop> 
@@ -66,8 +68,6 @@ Example::
 MQTT
 ^^^^
 MQTT is a lightweight message-passing protocol. You can use it to get live data and/or control commands into your infopanel. For instance, if you have `home-assistant <https://home-assistant.io>`_ running and it has a temperature sensor, you can have it use MQTT to send the temperature information to infopanel for display. 
-
-Here is an example with live travel times over I-90 and WA-520, as well as high, low, and current temperature (in celcius). (The headlines are coming directly from reddit, as you'll see below). 
 
 
 Before any of the MQTT stuff works, you need to configure it. You can have a MQTT server (like mosquitto) running locally on your Pi or on any other machine you have access to. If you're using home-assistant, you can basically duplicate the configuration to here. 

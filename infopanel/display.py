@@ -32,6 +32,15 @@ class Display(object):
         """Height of the display in pixels."""
         raise NotImplementedError
 
+    @property
+    def brightness(self):
+        """Brightness of display from 0 to 100."""
+        raise NotImplementedError
+
+    @brightness.setter
+    def brightness(self, value):
+        raise NotImplementedError
+
     def set_pixel(self, x, y, r, g, b):
         """Set a pixel to a color."""
         raise NotImplementedError
@@ -76,6 +85,16 @@ class RGBMatrixDisplay(Display):
     def height(self):
         """Height of the display in pixels."""
         return self._matrix.height
+
+    @property
+    def brightness(self):
+        """Brightness of display from 0 to 100."""
+        return self._matrix.brightness
+
+    @brightness.setter
+    def brightness(self, value):
+        self._matrix.brightness = value
+        self.canvas.brightness = value
 
     def text(self, font, x, y, red, green, blue, text):
         """Render text in a font to a place on the screen in a certain color."""

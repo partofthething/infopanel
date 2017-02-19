@@ -9,3 +9,4 @@ class InputData(collections.defaultdict):
         self.default_factory = lambda: 0
         self['power'] = '1'
         self['mode'] = 'all'
+        self['brightness'] = 100
