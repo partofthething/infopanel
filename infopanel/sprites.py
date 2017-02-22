@@ -19,7 +19,7 @@ GOOFY_EXCLAMATIONS = ['OW', 'HI', 'YUM', 'WOO', 'YES', 'CRAP', 'DANG', 'WHOOPS',
                       'BRAVO', 'CHEERS', 'G\'DAY', 'NICE', 'WEE', 'TATA', 'DUH',
                       'DERP', 'MERP', 'YAH', 'HEY', 'HO', 'BOOP', 'HMM', 'YAYA', 'SUP',
                       'BOP']
-PALLETE_SCHEMA = vol.Schema({int: list})
+PALLETE_SCHEMA = vol.Schema({vol.Any(int, str): list})
 
 FRAMES_SCHEMA = vol.Schema([str])
 LOG = logging.getLogger(__name__)

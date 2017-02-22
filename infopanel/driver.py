@@ -114,6 +114,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             return
         if mode not in self.modes:
             if mode in self.scenes:
+                # allow mode names to be any scene name to get just that mode.
                 self.scene_sequence = [self.scenes[mode]]
             else:
                 LOG.error('Invalid mode: %s', mode)
@@ -124,7 +125,6 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 scene = self.scenes[scene_name]
                 self.scene_sequence.append(scene)
                 self.durations_in_s[scene] = duration
-
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""
