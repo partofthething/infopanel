@@ -5,6 +5,10 @@ import inspect
 import sys
 import logging
 import datetime
+import os
+
+from PIL import Image as PILImage
+from PIL import ImageSequence
 
 from matplotlib import cm
 import voluptuous as vol
@@ -45,9 +49,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                        vol.Optional('text', default=''): str,
                        })
 
-    def __init__(self, data_source=None):
+    def __init__(self, max_x, max_y, data_source=None):
         self.x, self.y = None, None
-        self.max_x, self.max_y = None, None
+        self.max_x, self.max_y = max_x, max_y
         self._frame_num = 0
         self._ticks = 0  # to allow slower changes of frames, could probably be itertools.cycle
         self.ticks_per_frame = None
@@ -63,8 +67,13 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         if data_source is None:
             data_source = data.InputData()
         self.data_source = data_source
-        self.frames = None
+        self.frames = []
         self._frame_delta = 0
+
+    def __repr__(self):
+        return ('<{} at {}, {}. dx/dy: ({}, {}), size: ({}, {})>'
+                ''.format(self.__class__.__name__, self.x, self.y,
+                          self.dx, self.dy, self.max_x, self.max_y))
 
     def apply_config(self, conf):
         """
@@ -116,24 +125,26 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
     @property
     def width(self):
         """Width of the sprite."""
-        return len(self.frames[0][0])
+        return len(self.frame[0])
 
     @property
     def height(self):
         """Height of the sprite."""
-        return len(self.frames[0])
+        return len(self.frame)
 
     @property
     def frame(self):
-        """Get the current frame, and advance the ticks."""
-        pixels = self.frames[self._frame_num]
+        """Get the current frame."""
+        return self.frames[self._frame_num]
+
+    def tick(self):
+        """Update the animation ticks."""
         self._ticks += 1
         self.update_frame_num()
         self.check_movement()
         self.check_tick_bounds()
         self.check_frame_bounds()
         self.update_phrase()
-        return pixels
 
     def update_frame_num(self):
         """Change frame num when there have been enough ticks."""
@@ -178,10 +189,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             self._ticks = 0
 
     def check_frame_bounds(self):
-        """Roll back to first frame if all have been seen."""
-        if len(self.frames[0][0]) == 0:
-            self._frame_delta = 0
-        elif len(self.frames) == 1:
+        """Reverse back to first frame if all have been seen."""
+        if len(self.frames) == 1:
             self._frame_delta = 0
         elif self._frame_num == len(self.frames) - 1:
             self._frame_delta = -1
@@ -215,7 +224,6 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         # local variables for speed deep in the loop
         x = self.x
         pallete = self.pallete
-
         for yi, row in enumerate(self.frame):
             y = self.y + yi
             for xi, val in enumerate(row):
@@ -234,16 +242,21 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             else:
                 red, green, blue = pallete['text']
                 display.text(self.font, xtext, ytext, red, green, blue, self.text)
+        self.tick()
 
 
 class FancyText(Sprite):
     """Text with multiple colors and stuff that can move."""
 
-    def __init__(self, data_source=None):
-        Sprite.__init__(self, data_source=data_source)
+    def __init__(self, max_x, max_y, data_source=None):
+        Sprite.__init__(self, max_x, max_y, data_source=data_source)
         self.frames = [[[]]]
         self._text = []
         self._width = 0
+
+    def check_frame_bounds(self):
+        """No frames, no frame delta. ."""
+        self._frame_delta = 0
 
     def apply_config(self, conf):
         conf = Sprite.apply_config(self, conf)
@@ -281,7 +294,7 @@ class FancyText(Sprite):
         Can have lines that end with newline, and can have multiple colors.
         """
         x = 0
-        dummy = self.frame  # to tick the ticks.
+        self.tick()
         for text, rgb in self._text:
             if callable(text):
                 text = str(text())  # for dynamic values
@@ -299,8 +312,8 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
                                   vol.Optional('label_fmt', default='{}:'): str,
                                   vol.Optional('val_fmt', default='{}'): str})
 
-    def __init__(self, data_source):
-        FancyText.__init__(self, data_source=data_source)
+    def __init__(self, max_x, max_y, data_source):
+        FancyText.__init__(self, max_x, max_y, data_source=data_source)
         self.last_val = None
         self.color = None
         self.low_val = None
@@ -363,8 +376,8 @@ class Temperature(Duration):
 #                                  vol.Optional('val_fmt', default='{:> .1f}'): str
 #                                  })
 
-    def __init__(self, data_source=None):
-        Duration.__init__(self, data_source)
+    def __init__(self, max_x, max_y, data_source=None):
+        Duration.__init__(self, max_x, max_y, data_source)
         self.cmap = cm.jet  # pylint: disable=no-member
         self.label_fmt = '{}'  # until voluptuous bug fix is released
         self.val_fmt = '{:> .1f}'
@@ -380,8 +393,8 @@ class Temperature(Duration):
 class Giraffe(Sprite):
     """An animated Giraffe."""
 
-    def __init__(self):
-        Sprite.__init__(self)
+    def __init__(self, max_x, max_y, data_source=None):
+        Sprite.__init__(self, max_x, max_y, data_source)
         self.ticks_per_frame = 3
         self.pallete = {1: (255, 255, 0), 'text':[0, 255, 0]}
         self.dx = 1
@@ -419,8 +432,8 @@ class Giraffe(Sprite):
 
 class Plant(Sprite):
     """A tropical plant."""
-    def __init__(self, data_source=None):
-        Sprite.__init__(self, data_source)
+    def __init__(self, max_x, max_y, data_source=None):
+        Sprite.__init__(self, max_x, max_y, data_source)
         self.frames = [[[0, 1, 1, 1, 1, 0],
                         [1, 0, 0, 1, 0, 1],
                         [1, 0, 2, 0, 0, 1],
@@ -438,6 +451,60 @@ class Plant(Sprite):
         self.ticks_per_frame = random.randint(10, 20)
         self.pallete = {1: (0, 240, 0),
                         2: (165, 42, 42)}
+
+class Image(Sprite):
+    """Bitmap image."""
+    CONF = Sprite.CONF.extend({'path': vol.Coerce(str)})
+
+    def __init__(self, *args, **kwargs):
+        Sprite.__init__(self, *args, **kwargs)
+        self._image = None
+
+    def apply_config(self, conf):
+        conf = Sprite.apply_config(self, conf)
+        with PILImage.open(os.path.expandvars(conf['path'])) as image:
+            image.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
+            self._image = image.convert('RGB')
+        return conf
+
+    @property
+    def frame(self):
+        return self._image
+
+    @property
+    def width(self):
+        return self._image.size[0]
+
+    @property
+    def height(self):
+        return self._image.size[1]
+
+    def render(self, display):
+        display.set_image(self.frame, self.x, self.y)
+        self.tick()
+
+
+class AnimatedGif(Sprite):
+    """Animated gif sprite."""
+    CONF = Sprite.CONF.extend({'path': vol.Coerce(str)})
+    def apply_config(self, conf):
+        conf = Sprite.apply_config(self, conf)
+        self._image = PILImage.open(os.path.expandvars(conf['path']))
+        frames = [frame.copy() for frame in ImageSequence.Iterator(self._image)]
+        for frame in frames:
+            frame.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
+        self.frames = [frame.convert('RGB') for frame in frames]
+        self._frame_delta = 1
+
+    def check_frame_bounds(self):
+        """Roll back to first frame if all have been seen."""
+        if self._frame_num == len(self.frames) - 1:
+            self._frame_num = 0
+
+    def render(self, display):
+        display.set_image(self.frame, self.x, self.y)
+        self.tick()
+
 
 class Reddit(FancyText):
     """The titles of some top posts in various subreddits."""
@@ -469,8 +536,13 @@ class Reddit(FancyText):
     def update_headlines(self):
         """Update sprite text based on current subreddit contents."""
         self.clear()
-        for headline in self._praw.subreddit('+'.join(self.subreddits)).hot(limit=self.num_headlines):
-            self.add(headline.title + 10 * ' ', self.pallete['text'])
+        try:
+            headlines = self._praw.subreddit('+'.join(self.subreddits)).hot(limit=self.num_headlines)
+            for headline in headlines:
+                self.add(headline.title + 10 * ' ', self.pallete['text'])
+        except:
+            # possibly a connection error.
+            self.add('Headlines N/A', self.pallete['text'])
 
     def update_phrase(self):
         """Occasionally update the headlines."""
@@ -484,7 +556,7 @@ class Reddit(FancyText):
         return False
 
 
-def sprite_factory(config, data_source):
+def sprite_factory(config, data_source, disp):
     """Build sprites from config file."""
     sprites = {}
     for name, sprite_conf in config.items():
@@ -498,7 +570,8 @@ def sprite_factory(config, data_source):
         else:
             raise ValueError('{} is invalid sprite'.format(name))
         del sprite_conf['type']
-        sprite = cls(data_source=data_source)  # pylint:disable=undefined-loop-variable
+        sprite = cls(disp.width, disp.height, data_source=data_source)  # pylint:disable=undefined-loop-variable
         sprite.apply_config(sprite_conf)
         sprites[name] = sprite
+        LOG.debug('Build %s', sprite)
     return sprites

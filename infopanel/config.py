@@ -25,7 +25,7 @@ SPRITES = vol.Schema({str: SPRITE})
 
 SCENE_NAMES = [name for name, value in inspect.getmembers(scenes, inspect.isclass)]
 # sprite list in scenes is a list because you may want multiple of one sprite in a scene.
-SCENES = vol.Schema({str: {'type':vol.Any(*SCENE_NAMES),
+SCENES = vol.Schema({str: {vol.Optional('type', default='Scene'):vol.Any(*SCENE_NAMES),
                            vol.Optional('path'):str,
                            vol.Optional('sprites'):list}}, extra=vol.ALLOW_EXTRA)
 

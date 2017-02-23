@@ -145,7 +145,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 def driver_factory(disp, data_src, conf):
     """Build factory and add scenes and sprites."""
     driver = Driver(disp, data_src)
-    driver.sprites = sprites.sprite_factory(conf['sprites'], data_src)
+    driver.sprites = sprites.sprite_factory(conf['sprites'], data_src, disp)
     driver.scenes = scenes.scene_factory(disp.width, disp.height,
                                          conf['scenes'], driver.sprites)
 

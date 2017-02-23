@@ -45,7 +45,7 @@ class Display(object):
         """Set a pixel to a color."""
         raise NotImplementedError
 
-    def set_image(self, image):
+    def set_image(self, image, x=0, y=0):
         """Apply an image to the screen."""
         raise NotImplementedError
 
@@ -105,9 +105,9 @@ class RGBMatrixDisplay(Display):
         """Set a pixel to a color."""
         self.canvas.SetPixel(x, y, red, green, blue)
 
-    def set_image(self, image):
+    def set_image(self, image, x=0, y=0):
         """Apply an image to the screen."""
-        self.canvas.SetImage(image)
+        self.canvas.SetImage(image, x, y)
 
     def clear(self):
         """Clear the canvas."""

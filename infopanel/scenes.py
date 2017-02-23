@@ -8,9 +8,6 @@ import copy
 import logging
 import os
 
-from PIL import Image as PILImage
-from PIL import ImageSequence
-
 from infopanel import sprites, helpers
 
 
@@ -37,35 +34,6 @@ class Blank(Scene):
     def draw_frame(self, display):
         time.sleep(1.0)
 
-class Image(Scene):
-    """Full screen bitmap image."""
-    def __init__(self, width, height, path):
-        Scene.__init__(self, width, height)
-        with PILImage.open(os.path.expandvars(path)) as image:
-            image.thumbnail((self.width, self.height), PILImage.ANTIALIAS)
-            self.image = image.convert('RGB')
-
-    def draw_frame(self, display):
-        display.set_image(self.image)
-
-
-class AnimatedGif(Scene):
-    """Full screen animated gif."""
-    def __init__(self, width, height, path):
-        Scene.__init__(self, width, height)
-        self.image = PILImage.open(os.path.expandvars(path))
-
-        frames = [frame.copy() for frame in ImageSequence.Iterator(self.image)]
-        for frame in frames:
-            frame.thumbnail((self.width, self.height), PILImage.ANTIALIAS)
-        self.frames = itertools.cycle([frame.convert('RGB') for frame in frames])
-        self.delay = 0.05
-
-    def draw_frame(self, display):
-        display.set_image(next(self.frames))
-        time.sleep(self.delay)
-
-
 class Welcome(Scene):
     """Just a welcome message."""
     def __init__(self, width, height):
@@ -83,14 +51,14 @@ class Giraffes(Scene):
         Scene.__init__(self, width, height)
         self._extra_phrases = extra_phrases
         self._extra_phrase_frequency = extra_phrase_frequency
-        self.sprites = [sprites.Giraffe() for _i in range(3)]
+        self.sprites = [sprites.Giraffe(width, height) for _i in range(3)]
         self.sprites[1].flip_horizontal()
         self.sprites[1].dx = -1
         self.sprites[1].y = 18
         self.sprites[2].ticks_per_movement = 2
         self.sprites[2].y = 10
         for (x, y) in [(30, 10), (10, 20), (40, 5)]:
-            plant = sprites.Plant()
+            plant = sprites.Plant(width, height)
             plant.x, plant.y = x, y
             self.sprites.append(plant)
         for sprite in self.sprites:
@@ -126,16 +94,13 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
             for spritename, spriteparams in sprite_data.items():  # should be only one
                 # each active_scene gets independent copies of the sprites
                 sprite = copy.copy(existing_sprites[spritename])
-                for param, val in spriteparams.items():
-                    if not hasattr(sprite, param):
-                        raise ValueError('Invalid sprite parameter for {}: {}'
-                                         ''.format(sprite, param))
-                    setattr(sprite, param, val)
+                if spriteparams is not None:
+                    for param, val in spriteparams.items():
+                        if not hasattr(sprite, param):
+                            raise ValueError('Invalid sprite parameter for {}: {}'
+                                             ''.format(sprite, param))
+                        setattr(sprite, param, val)
             scene.sprites.append(sprite)
-
-        for sprite in scene.sprites:
-            sprite.max_x = width
-            sprite.max_y = height
 
         scene.apply_config(conf, existing_sprites)
 
