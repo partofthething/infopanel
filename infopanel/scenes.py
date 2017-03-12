@@ -1,17 +1,15 @@
 """Scenes. One of these will be active at any given time."""
 
-import itertools
 import time
 import inspect
 import sys
 import copy
 import logging
-import os
 
 from infopanel import sprites, helpers
 
-
 LOG = logging.getLogger(__name__)
+SCENE_BLANK = 'blank'
 
 class Scene(object):
     """A single screen's worth of sprites."""
@@ -76,7 +74,7 @@ class Giraffes(Scene):
 
 def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too-many-locals
     """Build scenes from config."""
-    scenes = {}
+    scenes = {SCENE_BLANK: Blank(width, height)}  # alway add blank scene for suspend
     cls = None
     for name, scene_data in conf.items():
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):

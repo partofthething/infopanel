@@ -300,14 +300,17 @@ Image files were made in The GIMP as binary bitmaps, though it might be possible
 
 Command and control
 -------------------
-There are 2 simple commands you can send to the *infopanel* via MQTT. The topics should be appended to the root topic defined in the MQTT configuration. Commands you can send are:
+There are several simple commands you can send to the *infopanel* via MQTT. The topics should be appended to the root topic defined in the MQTT configuration. Commands you can send are:
 
-======= ========= =========================
-Topic   Payload   Description
-======= ========= =========================
-power   1 or 0    Turn the power on or off
-mode    mode_name Switch modes to mode_name
-======= ========= =========================
+=============== ========= =========================
+Topic           Payload   Description
+=============== ========= =========================
+random          1 or 0    Toggle random scene order
+mode            mode_name Switch modes to mode_name
+brightness      0 to 100  Change screen brightness
+=============== ========= =========================
+
+Set mode to ``blank`` to shut down the panel. Special mode ``all`` will cycle through all defined scenes.
 
 Integration with Home-Assistant
 -------------------------------
@@ -332,10 +335,10 @@ Here is some home-assistant configuration to run this:
     switch:
       - platform: mqtt
         name: Infopanel
-        command_topic: "house/infopanel/power"
-        state_topic: "house/infopanel/power"
-        payload_on: "1"
-        payload_off: "0"
+        command_topic: "house/infopanel/mode"
+        state_topic: "house/infopanel/mode"
+        payload_on: "all"
+        payload_off: "blank"
         qos: 1
         retain: true
 

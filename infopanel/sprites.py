@@ -98,7 +98,6 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
     def _build_frames(self, frames):
         """Convert user-input custom frames into usable frames."""
         new_frames = []
-
         for framestr in frames:
             frame = []
             for intstr in framestr.split():
