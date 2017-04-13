@@ -464,20 +464,34 @@ class Plant(Sprite):
         self.pallete = {1: (0, 240, 0),
                         2: (165, 42, 42)}
 
-class Image(Sprite):
-    """Bitmap image."""
+class BaseImage(Sprite):
+    """Abstract image."""
     CONF = Sprite.CONF.extend({'path': vol.Coerce(str)})
-
-    def __init__(self, *args, **kwargs):
-        Sprite.__init__(self, *args, **kwargs)
-        self._image = None
 
     def apply_config(self, conf):
         conf = Sprite.apply_config(self, conf)
-        with PILImage.open(os.path.expandvars(conf['path'])) as image:
+        self.set_source_path(conf['path'])
+        return conf
+
+    def _render_frame(self, display):
+        display.set_image(self.frame, self.x, self.y)
+
+    def set_source_path(self, path):
+        """Set this image source to a new path."""
+        raise NotImplementedError
+
+
+class Image(BaseImage):
+    """Bitmap image that doesn't animate."""
+    def __init__(self, *args, **kwargs):
+        BaseImage.__init__(self, *args, **kwargs)
+        self._image = None
+
+    def set_source_path(self, path):
+        """Set this image source to a new path."""
+        with PILImage.open(os.path.expandvars(path)) as image:
             image.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
             self._image = image.convert('RGB')
-        return conf
 
     @property
     def frame(self):
@@ -491,18 +505,13 @@ class Image(Sprite):
     def height(self):
         return self._image.size[1]
 
-    def render(self, display):
-        display.set_image(self.frame, self.x, self.y)
-        self.tick()
 
-
-class AnimatedGif(Sprite):
+class AnimatedGif(BaseImage):
     """Animated gif sprite."""
-    CONF = Sprite.CONF.extend({'path': vol.Coerce(str)})
-    def apply_config(self, conf):
-        conf = Sprite.apply_config(self, conf)
-        self._image = PILImage.open(os.path.expandvars(conf['path']))
-        frames = [frame.copy() for frame in ImageSequence.Iterator(self._image)]
+
+    def set_source_path(self, path):
+        image = PILImage.open(os.path.expandvars(path))
+        frames = [frame.copy() for frame in ImageSequence.Iterator(image)]
         for frame in frames:
             frame.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
         self.frames = [frame.convert('RGB') for frame in frames]
@@ -512,10 +521,6 @@ class AnimatedGif(Sprite):
         """Roll back to first frame if all have been seen."""
         if self._frame_num == len(self.frames) - 1:
             self._frame_num = 0
-
-    def render(self, display):
-        display.set_image(self.frame, self.x, self.y)
-        self.tick()
 
 
 class Reddit(FancyText):
