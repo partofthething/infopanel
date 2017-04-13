@@ -47,6 +47,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                                                         'label':[255, 255, 0]}): PALLETE_SCHEMA,
                        vol.Optional('frames', default=None): FRAMES_SCHEMA,
                        vol.Optional('text', default=''): str,
+                       vol.Optional('can_flip', default=True): bool
                        })
 
     def __init__(self, max_x, max_y, data_source=None):
@@ -69,6 +70,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self.data_source = data_source
         self.frames = []
         self._frame_delta = 0
+        self.can_flip = None
+        self._phrase_width = 0
 
     def __repr__(self):
         return ('<{} at {}, {}. dx/dy: ({}, {}), size: ({}, {})>'
@@ -160,17 +163,19 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
         if self.x > self.max_x and self.dx > 0:
             if not self._maybe_flip():
-                self.x = 0 - self.width
-        elif self.x + self.width < 0 and self.dx < 0:
+                self.x = 0 - self.width - self._phrase_width
+        elif self.x + self.width + self._phrase_width < 0 and self.dx < 0:
             if not self._maybe_flip():
                 self.x = self.max_x
 
         if self.y > self.max_y and self.dy > 0:
-            self.y = 0
+            self.y = 0 - self.height
         elif self.y + self.height < 0 and self.dy < 0:
             self.y = self.max_y
 
     def _maybe_flip(self):
+        if not self.can_flip:
+            return False
         multiplier = random.choice([1, -1])
         self.dx *= multiplier
         if multiplier == -1:
@@ -217,9 +222,14 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self.x += self.dx
         self.y += self.dy
 
-
     def render(self, display):
         """Render a frame and advance."""
+        self._render_frame(display)
+        self._render_phrase(display)
+        self.tick()
+
+    def _render_frame(self, display):
+        """Render main part of the sprite."""
         # local variables for speed deep in the loop
         x = self.x
         pallete = self.pallete
@@ -229,19 +239,21 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                 if val:
                     red, green, blue = pallete[val]
                     display.set_pixel(x + xi, y, red, green, blue)
+
+    def _render_phrase(self, display):
+        """Render optional follower phrase."""
         # you could try to make text a FancyText object but then you have to double-
         # render all the motion an wrapping. It's too slow so this is just dumb text.
         if self.text:
-            xtext = x + self.width + 1
+            xtext = self.x + self.width + 1
             ytext = self.y + self.font.height
             if isinstance(self.text, Sprite):
                 self.text.x = xtext
                 self.text.y = ytext
-                self.text.render(display)  # pylint:disable=no-member
+                self._phrase_width = self.text.render(display)  # pylint:disable=no-member
             else:
-                red, green, blue = pallete['text']
-                display.text(self.font, xtext, ytext, red, green, blue, self.text)
-        self.tick()
+                red, green, blue = self.pallete['text']
+                self._phrase_width = display.text(self.font, xtext, ytext, red, green, blue, self.text)
 
 
 class FancyText(Sprite):
@@ -300,6 +312,7 @@ class FancyText(Sprite):
             r, g, b = rgb
             x += display.text(self.font, self.x + x, self.y, r, g, b, text)
         self._width = x
+        return x
 
 class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
     """Text that represents a duration with a green-to-red color."""
@@ -361,7 +374,7 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
 
     def render(self, canvas):
         self.update_color()
-        FancyText.render(self, canvas)
+        return FancyText.render(self, canvas)
 
 class Temperature(Duration):
     """A temperature with color dependent on a high and low bound."""
