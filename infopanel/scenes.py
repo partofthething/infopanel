@@ -67,7 +67,7 @@ class Giraffes(Scene):
         for sprite in self.sprites:
             if isinstance(sprite, sprites.Giraffe):
                 for extra_phrase in self._extra_phrases:
-                    phrase_sprite = existing_sprites[extra_phrase]
+                    phrase_sprite = existing_sprites[extra_phrase][0]
                     sprite.phrases.extend([phrase_sprite] * self._extra_phrase_frequency)
 
 
