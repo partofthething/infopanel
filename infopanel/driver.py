@@ -26,7 +26,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         LOG.info('Starting InfoPanel.')
         self.display = disp
         self.data_source = data_source
-        self.sprites = {}  # name: sprite
+        self.sprites = {}  # name: list of sprites
         self.scenes = {}  # name: scene
         self.durations_in_s = {}  # scene: seconds
         self.scene_sequence = []
@@ -86,12 +86,16 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         if self.data_source['brightness'] != self._brightness:
             try:
                 self._brightness = int(self.data_source['brightness'])
-            except:
+            except TypeError:
                 self._brightness = 100
             self.display.brightness = self._brightness
 
         if self.data_source['random'] != self._randomize_scenes:
             self._randomize_scenes = self.data_source['random']
+
+        if self.data_source['image_path']:
+            self.change_image_path(self.data_source['image_path'])
+            self.data_source['image_path'] = ''  # clear it out in anticipation of next command.
 
     def apply_mode(self, mode):
         """
@@ -118,6 +122,28 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self._scene_iterator = itertools.cycle(self.scene_sequence)
         self._previous_mode = self._mode  # for suspend/resume
         self._mode = mode
+
+    def change_image_path(self, pathsetting):
+        """
+        Change the image path.
+
+        The pathsetting is a special string in the form: spritename=newpath.
+        """
+        try:
+            sprite_name, new_path = pathsetting.split('=')
+        except ValueError:
+            LOG.error('Path change string %s invalid. Format: spritename=newpath', pathsetting)
+            return
+        sprites = self.sprites.get(sprite_name)
+        LOG.debug('Setting %s path to %s', sprite_name, new_path)
+        if not sprites:
+            LOG.warning('No sprite named %s to modify.', sprite_name)
+            return
+        try:
+            for sprite in sprites:
+                sprite.set_source_path(new_path)
+        except AttributeError:
+            LOG.warning('The %s sprite cannot have its path modified.', sprite_name)
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""

@@ -302,13 +302,14 @@ Command and control
 -------------------
 There are several simple commands you can send to the *infopanel* via MQTT. The topics should be appended to the root topic defined in the MQTT configuration. Commands you can send are:
 
-=============== ========= =========================
-Topic           Payload   Description
-=============== ========= =========================
-random          1 or 0    Toggle random scene order
-mode            mode_name Switch modes to mode_name
-brightness      0 to 100  Change screen brightness
-=============== ========= =========================
+=============== ==================    ===========================
+Topic           Payload               Description
+=============== ==================    ===========================
+random          1 or 0                Toggle random scene order
+mode            mode_name             Switch modes to mode_name
+brightness      0 to 100              Change screen brightness
+image_path      spritename=newpath    Update the path of an image
+=============== ==================    ===========================
 
 Set mode to ``blank`` to shut down the panel. Special mode ``all`` will cycle through all defined scenes.
 

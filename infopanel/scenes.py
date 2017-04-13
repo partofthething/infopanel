@@ -90,8 +90,10 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
         scene = cls(width, height, **scene_data)
         for sprite_data in sprites_to_add:
             for spritename, spriteparams in sprite_data.items():  # should be only one
-                # each active_scene gets independent copies of the sprites
-                sprite = copy.copy(existing_sprites[spritename])
+                # each active_scene gets independent copies of the sprites because scenes
+                # can set different custom config for each sprite (location, direction, color...)
+                sprite = copy.copy(existing_sprites[spritename][0])
+                existing_sprites[spritename].append(sprite)  # track the copies by name
                 if spriteparams is not None:
                     for param, val in spriteparams.items():
                         if not hasattr(sprite, param):

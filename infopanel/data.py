@@ -10,3 +10,4 @@ class InputData(collections.defaultdict):
         self['power'] = '1'
         self['mode'] = 'all'
         self['brightness'] = 100
+        self['image_path'] = ''

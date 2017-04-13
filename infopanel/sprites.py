@@ -589,6 +589,6 @@ def sprite_factory(config, data_source, disp):
         del sprite_conf['type']
         sprite = cls(disp.width, disp.height, data_source=data_source)  # pylint:disable=undefined-loop-variable
         sprite.apply_config(sprite_conf)
-        sprites[name] = sprite
+        sprites[name] = [sprite]  # track as list b/c copies will be added later and we track all.
         LOG.debug('Build %s', sprite)
     return sprites
