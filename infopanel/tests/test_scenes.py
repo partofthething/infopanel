@@ -2,7 +2,7 @@
 import unittest
 
 from infopanel import scenes, sprites
-from infopanel.tests import test_sprites, load_test_config
+from infopanel.tests import test_sprites, load_test_config, MockDisplay
 
 class TestScenes(unittest.TestCase):
 
@@ -22,7 +22,7 @@ class TestScenes(unittest.TestCase):
         self.assertEqual(scene.sprites[0].max_x, 64)
 
     def test_all(self):
-        existing_sprites = sprites.sprite_factory(self.conf['sprites'], None)
+        existing_sprites = sprites.sprite_factory(self.conf['sprites'], None, MockDisplay())
         scenes.scene_factory(64, 32, self.conf['scenes'], existing_sprites)
 
 
