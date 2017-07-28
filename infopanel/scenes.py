@@ -27,6 +27,11 @@ class Scene(object):
         """Apply optional extra config."""
         pass
 
+    def reinit(self):
+        """Called when scene comes back up on the screen."""
+        for sprite in self.sprites:
+            sprite.reinit()
+
 class Blank(Scene):
     """Just a blank screen."""
     def draw_frame(self, display):
@@ -45,10 +50,10 @@ class Welcome(Scene):
 class Giraffes(Scene):
     """A field of giraffes saying things."""
 
-    def __init__(self, width, height, extra_phrases, extra_phrase_frequency):
+    def __init__(self, width, height, extra_phrases=None, extra_phrase_frequency=None):
         Scene.__init__(self, width, height)
-        self._extra_phrases = extra_phrases
-        self._extra_phrase_frequency = extra_phrase_frequency
+        self._extra_phrases = extra_phrases or []
+        self._extra_phrase_frequency = extra_phrase_frequency or 1
         self.sprites = [sprites.Giraffe(width, height) for _i in range(3)]
         self.sprites[1].flip_horizontal()
         self.sprites[1].dx = -1
@@ -71,7 +76,6 @@ class Giraffes(Scene):
                     sprite.phrases.extend([phrase_sprite] * self._extra_phrase_frequency)
 
 
-
 def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too-many-locals
     """Build scenes from config."""
     scenes = {SCENE_BLANK: Blank(width, height)}  # alway add blank scene for suspend
@@ -87,6 +91,7 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
             sprites_to_add = scene_data.pop('sprites')
         else:
             sprites_to_add = []
+        LOG.debug('Initializing %s', cls)
         scene = cls(width, height, **scene_data)
         for sprite_data in sprites_to_add:
             for spritename, spriteparams in sprite_data.items():  # should be only one

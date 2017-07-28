@@ -102,8 +102,6 @@ sprites:
           10010
           10010
           01100
-
-scenes:
   flag: 
       type: Image
       path: $HOME/.infopanel/flag.ppm
@@ -113,6 +111,9 @@ scenes:
   hypnotoad:
       type: AnimatedGif
       path: $HOME/.infopanel/hypnotoad.gif
+
+scenes:
+
   giraffes:
       type: Giraffes
       extra_phrases: 
@@ -126,7 +127,6 @@ scenes:
   welcome:
       type: Welcome
   traffic:
-      type: Scene
       sprites: 
         - I90: 
             x: 0
@@ -150,7 +150,6 @@ scenes:
             x: 0 
             y: 32
   giraffe2:
-     type: Scene
      sprites: 
        - giraffe2:
            y: 10

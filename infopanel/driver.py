@@ -74,6 +74,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
         if new_scene is not self.active_scene:
             self.display.clear()
+            new_scene.reinit()
             LOG.debug('Switching to new scene: %s', new_scene)
         self.active_scene = new_scene
         self.interval = self.durations_in_s[self.active_scene]
@@ -151,8 +152,9 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.active_scene.draw_frame(self.display)
         self.display.buffer()
 
-    def init_modes(self, modeconf):
+    def init_modes(self, conf):
         """Process modes from configuration."""
+        modeconf = conf['modes']
         self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0)]  # blank mode for suspend
 
         for mode_name, scenelist in modeconf.items():
@@ -168,7 +170,9 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 continue
             self.modes[MODE_ALL].append((scene_name, MODE_ALL_DURATION))
 
-        self.apply_mode(MODE_ALL)
+        default_mode = conf['global'].get('default_mode', MODE_ALL)
+        self.apply_mode(default_mode)
+        self.data_source['mode'] = default_mode
         self._change_scene()
 
 
@@ -178,7 +182,7 @@ def driver_factory(disp, data_src, conf):
     driver.sprites = sprites.sprite_factory(conf['sprites'], data_src, disp)
     driver.scenes = scenes.scene_factory(disp.width, disp.height,
                                          conf['scenes'], driver.sprites)
-    driver.init_modes(conf['modes'])
+    driver.init_modes(conf)
     return driver
 
 def apply_global_config(conf):
@@ -201,13 +205,17 @@ def run(conf_file=None):
     datasrc = data.InputData()
     infopanel = driver_factory(disp, datasrc, conf)
 
-    client = mqtt.MQTTClient(datasrc, conf['mqtt'])
-    client.start()
+    if conf.get('mqtt'):
+        client = mqtt.MQTTClient(datasrc, conf['mqtt'])
+        client.start()
+    else:
+        client = None
     try:
         # infopanel.start()  # multiple threads
         infopanel.run()  # main thread
     finally:
-        client.stop()
+        if client:
+            client.stop()
         LOG.info('Quitting.')
 
 if __name__ == "__main__":

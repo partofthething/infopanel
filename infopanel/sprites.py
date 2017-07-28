@@ -255,6 +255,13 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                 red, green, blue = self.pallete['text']
                 self._phrase_width = display.text(self.font, xtext, ytext, red, green, blue, self.text)
 
+    def reinit(self):
+        """
+        Perform actions when the sprite gets put back on the screen.
+        
+        You could reset position or whatever here. 
+        """
+        pass
 
 class FancyText(Sprite):
     """Text with multiple colors and stuff that can move."""
@@ -480,6 +487,10 @@ class BaseImage(Sprite):
         """Set this image source to a new path."""
         raise NotImplementedError
 
+    def flip_horizontal(self):
+        """Images can't flip... yet."""
+        pass
+
 
 class Image(BaseImage):
     """Bitmap image that doesn't animate."""
@@ -521,6 +532,16 @@ class AnimatedGif(BaseImage):
         """Roll back to first frame if all have been seen."""
         if self._frame_num == len(self.frames) - 1:
             self._frame_num = 0
+
+    @property
+    def width(self):
+        width, _height = self.frame.size
+        return width
+
+    @property
+    def height(self):
+        _width, height = self.frame.size
+        return height
 
 
 class Reddit(FancyText):

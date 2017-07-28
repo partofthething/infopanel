@@ -44,7 +44,9 @@ RGBMATRIX = vol.Schema({'led-rows':int,
                         'led-no-hardware-pulse': bool
                        })
 
-GLOBAL = vol.Schema({'font_dir':str})
+GLOBAL = vol.Schema({'font_dir':str,
+                     'default_mode':str,
+                     'random':bool})
 
 SCHEMA = vol.Schema({'mqtt':MQTT,
                      'sprites': SPRITES,

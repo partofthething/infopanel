@@ -11,3 +11,4 @@ class InputData(collections.defaultdict):
         self['mode'] = 'all'
         self['brightness'] = 100
         self['image_path'] = ''
+        self['random'] = '0'
