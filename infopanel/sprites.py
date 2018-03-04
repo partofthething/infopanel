@@ -168,7 +168,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             if not self._maybe_flip():
                 self.x = self.max_x
 
-        if self.y > self.max_y and self.dy > 0:
+        if self.y - self.height > self.max_y and self.dy > 0:
             self.y = 0 - self.height
         elif self.y + self.height < 0 and self.dy < 0:
             self.y = self.max_y
@@ -258,8 +258,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
     def reinit(self):
         """
         Perform actions when the sprite gets put back on the screen.
-        
-        You could reset position or whatever here. 
+
+        You could reset position or whatever here.
         """
         pass
 
