@@ -88,7 +88,7 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
     """Build scenes from config."""
     scenes = {SCENE_BLANK: Blank(width, height)}  # alway add blank scene for suspend
     cls = None
-    for name, scene_data in conf.items():
+    for name, scene_data in conf.items():  # pylint: disable=too-many-nested-blocks
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
             if scene_data['type'] == cls_name:
                 break

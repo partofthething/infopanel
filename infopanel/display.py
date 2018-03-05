@@ -42,7 +42,7 @@ class Display(object):
     def brightness(self, value):
         raise NotImplementedError
 
-    def set_pixel(self, x, y, r, g, b):
+    def set_pixel(self, x, y, red, green, blue):
         """Set a pixel to a color."""
         raise NotImplementedError
 

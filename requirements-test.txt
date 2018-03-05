@@ -1,0 +1,7 @@
+pylint
+pydocstyle
+coveralls
+pytest
+pytest-cov
+pytest-timeout
+pytest-sugar
