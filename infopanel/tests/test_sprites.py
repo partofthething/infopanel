@@ -5,8 +5,6 @@ import unittest
 from infopanel import sprites, data
 from infopanel.tests import load_test_config, MockDisplay
 
-DURATION_CONFIG = {'I90':{'type':'Duration', 'label':'I90', 'low_val':13.0,
-                          'high_val':25.0, 'data_label':'travel_time_i90'}}
 
 class TestSprite(unittest.TestCase):
 
@@ -47,7 +45,8 @@ class TestTemperature(unittest.TestCase):
 
 
 def build_test_sprites():
-
+    DURATION_CONFIG = {'I90':{'type':'Duration', 'label':'I90', 'low_val':13.0,  # pylint:disable=invalid-name
+                              'high_val':25.0, 'data_label':'travel_time_i90'}}
     datasrc = data.InputData()
     datasrc['travel_time_i90'] = 10.0
     return sprites.sprite_factory(DURATION_CONFIG, datasrc, MockDisplay())

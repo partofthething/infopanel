@@ -102,15 +102,15 @@ sprites:
           10010
           10010
           01100
-  flag: 
-      type: Image
-      path: $HOME/.infopanel/flag.ppm
-  cat: 
-      type: AnimatedGif
-      path: $HOME/.infopanel/rainbow_cat.gif
-  hypnotoad:
-      type: AnimatedGif
-      path: $HOME/.infopanel/hypnotoad.gif
+          #  flag: 
+          #      type: Image
+          #      path: flag.ppm
+      #  cat: 
+      #      type: AnimatedGif
+      #      path: $HOME/.infopanel/rainbow_cat.gif
+      #  hypnotoad:
+      #      type: AnimatedGif
+      #      path: $HOME/.infopanel/hypnotoad.gif
 
 scenes:
 
