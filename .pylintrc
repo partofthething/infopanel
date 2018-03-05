@@ -9,4 +9,7 @@ method-rgx=[a-z_][a-z0-9_]{2,50}$
 function-rgx=[a-z_][a-z0-9_]{2,50}$
 
 [DESIGN]
-max-args=7
+max-args=8
+
+[MESSAGES CONTROL]
+disable=superfluous-parens

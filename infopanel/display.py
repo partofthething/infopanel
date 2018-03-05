@@ -18,6 +18,7 @@ class Display(object):
 
     This is a common interface to whatever kind of display you have.
     """
+
     def text(self, font, x, y, red, green, blue, text):
         """Render text in a font to a place on the screen in a certain color."""
         raise NotImplementedError
@@ -59,7 +60,7 @@ class Display(object):
             self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
 
     def draw_box(self, xmin, ymin, xmax, ymax):
-        """Don't use PIL because it blanks.  NOTE: Use graphics.DrawLine"""
+        """Don't use PIL because it blanks.  NOTE: Use graphics.DrawLine."""
         for x in range(xmin, xmax):
             self.set_pixel(x, ymin, 0, 200, 0)
             self.set_pixel(x, ymax, 0, 200, 0)
@@ -71,7 +72,9 @@ class Display(object):
 
 class RGBMatrixDisplay(Display):
     """An RGB LED Matrix running off of the rgbmatrix library."""
+
     def __init__(self, matrix):
+        """Construct a matrix."""
         Display.__init__(self)
         self._matrix = matrix
         self.canvas = matrix.CreateFrameCanvas()
@@ -139,7 +142,6 @@ def rgbmatrix_options_factory(config):
 
 def display_factory(config):
     """Build a display based on config settings."""
-
     if 'RGBMatrix' in config:
         if RGBMatrix is None:
             return Display()

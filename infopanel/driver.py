@@ -22,7 +22,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Driver(object):  # pylint: disable=too-many-instance-attributes
     """Main controller for the infopanel."""
+
     def __init__(self, disp, data_source):
+        """Construct infopanel driver."""
         LOG.info('Starting InfoPanel.')
         self.display = disp
         self.data_source = data_source
@@ -48,6 +50,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         -----
         Uses the clock to figure out when to switch scenes instead of the number of frames
         because some scenes are way slower than others.
+
         """
         interval_start = time.time()
         while True:
@@ -135,13 +138,13 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         except ValueError:
             LOG.error('Path change string %s invalid. Format: spritename=newpath', pathsetting)
             return
-        sprites = self.sprites.get(sprite_name)
+        sprites_of_name = self.sprites.get(sprite_name)
         LOG.debug('Setting %s path to %s', sprite_name, new_path)
-        if not sprites:
+        if not sprites_of_name:
             LOG.warning('No sprite named %s to modify.', sprite_name)
             return
         try:
-            for sprite in sprites:
+            for sprite in sprites_of_name:
                 sprite.set_source_path(new_path)
         except AttributeError:
             LOG.warning('The %s sprite cannot have its path modified.', sprite_name)

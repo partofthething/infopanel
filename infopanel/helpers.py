@@ -13,19 +13,17 @@ def day_of_week():
     return today.strftime("%A").upper()
 
 def time_now():
-    """Current time like 17:05."""
+    """Get current time like 17:05."""
     now = datetime.datetime.now()
     return now.strftime('%H:%M')
 
 def date():
-    """Date today, like: FEB 02"""
+    """Get date today, like: FEB 02."""
     now = datetime.datetime.now()
     return now.strftime('%b %d').upper()
 
 def load_font(name):
-
-
-    global FONTS
+    """Load a font."""
     font = FONTS.get(name)
 
     if font is None:

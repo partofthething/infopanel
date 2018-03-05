@@ -1,4 +1,5 @@
 """Universal test stuff."""
+# pylint: disable=abstract-method
 import os
 
 from infopanel import driver, config, display
@@ -12,10 +13,14 @@ def load_test_config():
     return conf
 
 class MockDisplay(display.Display):
+    """A display mock."""
+
     @property
     def height(self):
+        """Get the height."""
         return 32
 
     @property
     def width(self):
+        """Get the width."""
         return 64

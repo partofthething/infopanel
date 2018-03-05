@@ -1,8 +1,12 @@
 """Tests for sprites."""
+# pylint: disable=missing-docstring
 import unittest
 
 from infopanel import sprites, data
 from infopanel.tests import load_test_config, MockDisplay
+
+DURATION_CONFIG = {'I90':{'type':'Duration', 'label':'I90', 'low_val':13.0,
+                          'high_val':25.0, 'data_label':'travel_time_i90'}}
 
 class TestSprite(unittest.TestCase):
 
@@ -38,13 +42,12 @@ class TestTemperature(unittest.TestCase):
     def test_scroll_frames(self):
         """Make sure frames are dealt with for non-animated things."""
         temp = self.sprites['scroll'][0]
-        self.assertEqual(temp._frame_delta, 0)
+        self.assertEqual(temp._frame_delta, 0)  # pylint:disable=protected-access
         self.assertEqual(len(temp.frames[0][0]), 0)
 
 
 def build_test_sprites():
-    DURATION_CONFIG = {'I90':{'type':'Duration', 'label':'I90', 'low_val':13.0,
-                     'high_val':25.0, 'data_label':'travel_time_i90' }}
+
     datasrc = data.InputData()
     datasrc['travel_time_i90'] = 10.0
     return sprites.sprite_factory(DURATION_CONFIG, datasrc, MockDisplay())

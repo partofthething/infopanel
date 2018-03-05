@@ -10,17 +10,18 @@ class MQTTClient(object):
     """MQTT Client."""
 
     def __init__(self, data_container, conf):
+        """Construct the MQTT client."""
         self._client = None
         self._data_container = data_container
         self.conf = conf
 
     def on_connect(self, client, userdata, flags, rc):  # pylint: disable=unused-argument, invalid-name
-        """Callback for when MQTT server connects."""
+        """Do callback for when MQTT server connects."""
         LOG.info("Connected with result code %d", rc)
         client.subscribe(self.conf['topic'])  # subscribe in case we get disconnected
 
     def on_message(self, client, userdata, msg):  # pylint: disable=unused-argument
-        """Callback for when MQTT receives a message."""
+        """Do callback for when MQTT receives a message."""
         LOG.debug("%s %s", msg.topic, str(msg.payload))
         key = msg.topic.split('/')[-1]
         self._data_container[key] = msg.payload

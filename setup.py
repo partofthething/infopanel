@@ -18,7 +18,7 @@ setup(name='infopanel',
     author_email='infopanel@partofthething.com',
     url='https://github.com/partofthething/infopanel',
     packages=find_packages(),
-    license='MIT',
+    license='GPL',
     long_description=long_description,
     install_requires=required,
     keywords='monitoring mqtt animation led rgb matrix',
@@ -33,6 +33,6 @@ setup(name='infopanel',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         ],
-      test_suite='tests'
-
+      test_suite='tests',
+      include_package_data=True
      )

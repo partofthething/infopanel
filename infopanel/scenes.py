@@ -13,7 +13,9 @@ SCENE_BLANK = 'blank'
 
 class Scene(object):
     """A single screen's worth of sprites."""
+
     def __init__(self, width, height):
+        """Construct a scene."""
         self.width = width
         self.height = height
         self.sprites = []
@@ -28,22 +30,27 @@ class Scene(object):
         pass
 
     def reinit(self):
-        """Called when scene comes back up on the screen."""
+        """Reinitialize when scene comes back up on the screen."""
         for sprite in self.sprites:
             sprite.reinit()
 
 class Blank(Scene):
     """Just a blank screen."""
+
     def draw_frame(self, display):
+        """Draw a blank frame."""
         time.sleep(1.0)
 
 class Welcome(Scene):
     """Just a welcome message."""
+
     def __init__(self, width, height):
+        """Construct a scene."""
         Scene.__init__(self, width, height)
         self.font = helpers.load_font('9x15B.bdf')
 
     def draw_frame(self, display):
+        """Draw the welcome frame."""
         display.rainbow_text(self.font, 5, 20, 'HELLO!')
 
 
@@ -51,6 +58,7 @@ class Giraffes(Scene):
     """A field of giraffes saying things."""
 
     def __init__(self, width, height, extra_phrases=None, extra_phrase_frequency=None):
+        """Construct a scene."""
         Scene.__init__(self, width, height)
         self._extra_phrases = extra_phrases or []
         self._extra_phrase_frequency = extra_phrase_frequency or 1
