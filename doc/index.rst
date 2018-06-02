@@ -107,6 +107,7 @@ Built-in sprites include:
     * **Giraffe** -- A Giraffe that runs around
     * **Plant** -- A plant that sits around
     * **FancyText** -- Multicolor text
+    * **DynamicFancyText** -- Multicolor text that can get live data (i.e. via MQTT)
     * **Duration** -- Text that represents like, a travel time. Longer times become redder, shorter times are green.
     * **Temperature** -- Text that represents a temperature. Higher is red, lower is green. 
     * **Reddit** -- Text that is sourced directly from the reddit webpage via the PRAW package
@@ -120,6 +121,7 @@ You can define live MQTT text as a sprite. Here is a MQTT-text value that will r
           low_val: 13.0
           high_val: 23.0
           data_label: travel_time_i90
+          label_color: purple
 
 That will be green if it's near 13 minutes and red if it's above 23 minutes. You can use this to tell yourself how long your commute will be, for example. 
 

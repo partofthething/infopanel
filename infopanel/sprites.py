@@ -329,38 +329,84 @@ class FancyText(Sprite):
         self._width = x
         return x
 
-class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
-    """Text that represents a duration with a green-to-red color."""
+
+class DynamicFancyText(FancyText):  # pylint:disable=too-many-instance-attributes
+    """
+    FancyText that can have a changing/live data source.
+
+    This has a ``label`` configuration to render something like:
+    ``Label: [value]``
+    """
 
     CONF = FancyText.CONF.extend({'label': vol.Coerce(str),
-                                  vol.Optional('low_val', default=13.0):vol.Coerce(float),
-                                  vol.Optional('high_val', default=23.0): vol.Coerce(float),
                                   vol.Optional('data_label'): vol.Coerce(str),
                                   vol.Optional('label_fmt', default='{}:'): str,
-                                  vol.Optional('val_fmt', default='{}'): str})
+                                  vol.Optional('val_fmt', default='{}'): str,
+                                  vol.Optional('label_color', default='yellow'): str,
+                                  vol.Optional('value_color', default='green'): str})
 
     def __init__(self, max_x, max_y, data_source):
         """Construct a sprite."""
         FancyText.__init__(self, max_x, max_y, data_source=data_source)
         self.last_val = None
-        self.color = None
-        self.low_val = None
-        self.high_val = None
         self.label = None
         self.value = None
         self.label_fmt = None
         self.val_fmt = None
         self.data_label = None
-        self.cmap = colors.GREEN_RED
+        self.label_color = None
+        self.value_color = None
 
     def apply_config(self, conf):
         """Validate and apply configuration to this sprite."""
         conf = FancyText.apply_config(self, conf)
         if conf['data_label']:
-            # make function to get live data off of object
+            # make this a callable function to enable live/updating data
             self.value = lambda: self._convert_data(self.data_source[conf['data_label']])
         self._make_text()
         return conf
+
+    def _convert_data(self, val):  # pylint: disable=no-self-use
+        return val
+
+    def _make_text(self):
+        """Render the label and live value."""
+        if self.label:
+            DynamicFancyText.add(self,
+                                 self.label_fmt.format(self.label),
+                                 colors.rgb_from_name(self.label_color))
+        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
+        text = self.val_fmt.format(val)
+        self.last_val = val
+        DynamicFancyText.add(self, text, colors.rgb_from_name(self.value_color))
+
+    def update_value(self):
+        """Update, but only if the value has changed."""
+        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
+        if val != self.last_val:
+            # only do lookup when things change for speed.
+            self.clear()
+            self._make_text()
+
+    def render(self, display):
+        """Render a frame and advance."""
+        self.update_value()
+        return FancyText.render(self, display)
+
+
+class Duration(DynamicFancyText):  # pylint:disable=too-many-instance-attributes
+    """Text that renders a number (maybe a duration?) with a green-to-red color."""
+
+    CONF = DynamicFancyText.CONF.extend({vol.Optional('low_val', default=13.0):vol.Coerce(float),
+                                         vol.Optional('high_val', default=23.0): vol.Coerce(float)})
+
+    def __init__(self, max_x, max_y, data_source):
+        """Construct a sprite."""
+        DynamicFancyText.__init__(self, max_x, max_y, data_source=data_source)
+        self.last_val = None
+        self.low_val = None
+        self.high_val = None
+        self.cmap = colors.GREEN_RED
 
     def _convert_data(self, val):  # pylint: disable=no-self-use
         try:
@@ -370,7 +416,9 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
 
     def _make_text(self):
         """Make elements of a duration with label and text."""
-        FancyText.add(self, self.label_fmt.format(self.label), colors.rgb_from_name('yellow'))
+        DynamicFancyText.add(self,
+                             self.label_fmt.format(self.label),
+                             colors.rgb_from_name(self.label_color))
         val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
         if val is None:
             color = colors.interpolate_color(self.low_val, self.low_val, self.high_val, self.cmap)
@@ -379,20 +427,8 @@ class Duration(FancyText):  # pylint:disable=too-many-instance-attributes
             color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
             text = self.val_fmt.format(val)
         self.last_val = val
-        FancyText.add(self, text, color)
+        DynamicFancyText.add(self, text, color)
 
-    def update_color(self):
-        """Update the interpolated color if value changed."""
-        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
-        if val != self.last_val:
-            # only do lookup when things change for speed.
-            self.clear()
-            self._make_text()
-
-    def render(self, display):
-        """Render a frame and advance."""
-        self.update_color()
-        return FancyText.render(self, display)
 
 class Temperature(Duration):
     """A temperature with color dependent on a high and low bound."""
