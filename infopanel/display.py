@@ -11,7 +11,7 @@ except ImportError:
 from infopanel import colors
 
 
-class Display:
+class Display(object):
     """
     A display screen.
 

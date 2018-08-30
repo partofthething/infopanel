@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 SCENE_BLANK = 'blank'
 
 
-class Scene:
+class Scene(object):
     """A single screen's worth of sprites."""
 
     def __init__(self, width, height):

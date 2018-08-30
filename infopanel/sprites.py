@@ -28,7 +28,7 @@ FRAMES_SCHEMA = vol.Schema([str])
 LOG = logging.getLogger(__name__)
 
 
-class Sprite:  # pylint: disable=too-many-instance-attributes
+class Sprite(object):  # pylint: disable=too-many-instance-attributes
     """A thing that may be animated or not, and may move or not."""
 
     CONF = vol.Schema({vol.Optional('dx', default=0): int,
