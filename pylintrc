@@ -1,0 +1,27 @@
+[MASTER]
+
+[MESSAGES CONTROL]
+
+disable=
+    useless-object-inheritance
+    
+[DESIGN]
+max-args=8
+
+    
+[FORMAT]
+good-names=i,
+           j,
+           k,
+           ex,
+           Run,
+           x, 
+           y,
+           r,
+           g,
+           b,
+           xi,
+           yi,
+           dx,
+           dy
+           
