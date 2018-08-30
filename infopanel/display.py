@@ -54,7 +54,8 @@ class Display(object):
         """Make rainbow text."""
         x_orig = x
         for i, char in enumerate(text):
-            r, g, b = colors.interpolate_color(float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
+            r, g, b = colors.interpolate_color(
+                float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
             x += self.text(font, x, y, r, g, b, char)
         if box:
             self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
@@ -140,6 +141,7 @@ def rgbmatrix_options_factory(config):
         options.disable_hardware_pulsing = True
     return options
 
+
 def display_factory(config):
     """Build a display based on config settings."""
     if 'RGBMatrix' in config:
@@ -148,6 +150,9 @@ def display_factory(config):
         options = rgbmatrix_options_factory(config['RGBMatrix'])
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)
+    elif 'DummyMatrix' in config:
+        from infopanel.tests import dummy_screen
+        display = dummy_screen.DummyScreen()
     else:
         raise ValueError('Unknown Display options. Check config file.')
     return display

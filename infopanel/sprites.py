@@ -47,7 +47,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                                                         'label':[255, 255, 0]}): PALLETE_SCHEMA,
                        vol.Optional('frames', default=None): FRAMES_SCHEMA,
                        vol.Optional('text', default=''): str,
-                       vol.Optional('can_flip', default=True): bool})
+                       vol.Optional('can_flip', default=True): bool,
+                       vol.Optional('reverse_frame_loop', default=True): bool})
 
     def __init__(self, max_x, max_y, data_source=None):
         """Construct a sprite."""
@@ -71,6 +72,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self.frames = []
         self._frame_delta = 0
         self.can_flip = None
+        self.reverse_frame_loop = None
         self._phrase_width = 0
 
     def __repr__(self):
@@ -153,6 +155,10 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         """Change frame num when there have been enough ticks."""
         if not self._ticks % self.ticks_per_frame:
             self._frame_num += self._frame_delta
+            if self._frame_num == len(self.frames):
+                # loop around if we overstepped the bounds
+                # This should never happen if reverse_frame_loop is true
+                self._frame_num = 0
 
     def check_movement(self):
         """Move if there have been enough ticks, and wrap."""
@@ -194,10 +200,14 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             self._ticks = 0
 
     def check_frame_bounds(self):
-        """Reverse back to first frame if all have been seen."""
+        """
+        Reverse back to first frame if all have been seen.
+
+        If ``reverse_frame_loop`` is ``False``, then this just loops the frames
+        continuously."""
         if len(self.frames) == 1:
             self._frame_delta = 0
-        elif self._frame_num == len(self.frames) - 1:
+        elif self.reverse_frame_loop and self._frame_num == len(self.frames) - 1:
             self._frame_delta = -1
         elif self._frame_num == 0:
             self._frame_delta = 1

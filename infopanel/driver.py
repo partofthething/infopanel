@@ -20,6 +20,7 @@ OFF = '0'
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+
 class Driver(object):  # pylint: disable=too-many-instance-attributes
     """Main controller for the infopanel."""
 
@@ -40,7 +41,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.active_scene = None
         self._stop = threading.Event()
         self.interval = 2
-        self._brightness = 100  # just used to detect changes in data. Should be handeled on data.
+        # just used to detect changes in data. Should be handeled on data.
+        self._brightness = 100
 
     def run(self):
         """
@@ -99,7 +101,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
         if self.data_source['image_path']:
             self.change_image_path(self.data_source['image_path'])
-            self.data_source['image_path'] = ''  # clear it out in anticipation of next command.
+            # clear it out in anticipation of next command.
+            self.data_source['image_path'] = ''
 
     def apply_mode(self, mode):
         """
@@ -136,7 +139,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         try:
             sprite_name, new_path = pathsetting.split('=')
         except ValueError:
-            LOG.error('Path change string %s invalid. Format: spritename=newpath', pathsetting)
+            LOG.error(
+                'Path change string %s invalid. Format: spritename=newpath', pathsetting)
             return
         sprites_of_name = self.sprites.get(sprite_name)
         LOG.debug('Setting %s path to %s', sprite_name, new_path)
@@ -147,7 +151,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             for sprite in sprites_of_name:
                 sprite.set_source_path(new_path)
         except AttributeError:
-            LOG.warning('The %s sprite cannot have its path modified.', sprite_name)
+            LOG.warning(
+                'The %s sprite cannot have its path modified.', sprite_name)
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""
@@ -158,13 +163,15 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
     def init_modes(self, conf):
         """Process modes from configuration."""
         modeconf = conf['modes']
-        self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0)]  # blank mode for suspend
+        # blank mode for suspend
+        self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0)]
 
         for mode_name, scenelist in modeconf.items():
             self.modes[mode_name] = []
             for sceneinfo in scenelist:
                 for scene_name, durationinfo in sceneinfo.items():
-                    self.modes[mode_name].append((scene_name, durationinfo['duration']))
+                    self.modes[mode_name].append(
+                        (scene_name, durationinfo['duration']))
 
         self.modes[MODE_ALL] = []  # make a default catch-all mode.
         for scene_name in self.scenes:
@@ -188,10 +195,12 @@ def driver_factory(disp, data_src, conf):
     driver.init_modes(conf)
     return driver
 
+
 def apply_global_config(conf):
     """Apply config items that are global in nature."""
     from infopanel import helpers
     helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
+
 
 def run(conf_file=None):
     """Run the screen."""
@@ -220,6 +229,7 @@ def run(conf_file=None):
         if client:
             client.stop()
         LOG.info('Quitting.')
+
 
 if __name__ == "__main__":
     run()
