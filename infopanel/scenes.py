@@ -5,11 +5,13 @@ import inspect
 import sys
 import copy
 import logging
+import datetime
 
 from infopanel import sprites, helpers
 
 LOG = logging.getLogger(__name__)
 SCENE_BLANK = 'blank'
+
 
 class Scene(object):
     """A single screen's worth of sprites."""
@@ -34,12 +36,14 @@ class Scene(object):
         for sprite in self.sprites:
             sprite.reinit()
 
+
 class Blank(Scene):
     """Just a blank screen."""
 
     def draw_frame(self, display):
         """Draw a blank frame."""
         time.sleep(1.0)
+
 
 class Welcome(Scene):
     """Just a welcome message."""
@@ -52,6 +56,20 @@ class Welcome(Scene):
     def draw_frame(self, display):
         """Draw the welcome frame."""
         display.rainbow_text(self.font, 5, 20, 'HELLO!')
+
+
+class Time(Scene):
+    """Basic clock"""
+
+    def __init__(self, width, height):
+        """Construct a scene."""
+        Scene.__init__(self, width, height)
+        self.font = helpers.load_font('9x15B.bdf')
+
+    def draw_frame(self, display):
+        """Draw the current time."""
+        now = datetime.datetime.now()
+        display.rainbow_text(self.font, 5, 20, now.strftime('%I:%M %p'))
 
 
 class Giraffes(Scene):
@@ -81,12 +99,14 @@ class Giraffes(Scene):
             if isinstance(sprite, sprites.Giraffe):
                 for extra_phrase in self._extra_phrases:
                     phrase_sprite = existing_sprites[extra_phrase][0]
-                    sprite.phrases.extend([phrase_sprite] * self._extra_phrase_frequency)
+                    sprite.phrases.extend(
+                        [phrase_sprite] * self._extra_phrase_frequency)
 
 
 def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too-many-locals
     """Build scenes from config."""
-    scenes = {SCENE_BLANK: Blank(width, height)}  # alway add blank scene for suspend
+    scenes = {SCENE_BLANK: Blank(width, height)
+              }  # alway add blank scene for suspend
     cls = None
     for name, scene_data in conf.items():  # pylint: disable=too-many-nested-blocks
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
@@ -104,9 +124,11 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
         for sprite_data in sprites_to_add:
             for spritename, spriteparams in sprite_data.items():  # should be only one
                 # each active_scene gets independent copies of the sprites because scenes
-                # can set different custom config for each sprite (location, direction, color...)
+                # can set different custom config for each sprite (location,
+                # direction, color...)
                 sprite = copy.copy(existing_sprites[spritename][0])
-                existing_sprites[spritename].append(sprite)  # track the copies by name
+                existing_sprites[spritename].append(
+                    sprite)  # track the copies by name
                 if spriteparams is not None:
                     for param, val in spriteparams.items():
                         if not hasattr(sprite, param):

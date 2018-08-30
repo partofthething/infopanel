@@ -126,6 +126,8 @@ scenes:
 
   welcome:
       type: Welcome
+  time: 
+      type: Time
   traffic:
       sprites: 
         - I90: 
