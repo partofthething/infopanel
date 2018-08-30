@@ -6,7 +6,8 @@ import paho.mqtt.client as mqtt
 
 LOG = logging.getLogger(__name__)
 
-class MQTTClient(object):
+
+class MQTTClient:
     """MQTT Client."""
 
     def __init__(self, data_container, conf):

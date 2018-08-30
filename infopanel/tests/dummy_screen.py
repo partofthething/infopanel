@@ -1,6 +1,4 @@
-"""
-Dummy screen for testing in development using pygame.
-"""
+"""Dummy screen for testing in development using pygame."""
 import pygame
 
 from infopanel import display
@@ -12,9 +10,10 @@ class DummyScreen(display.Display):
     """A dummy screen for testing purposes."""
 
     def __init__(self, width=64, height=32):
-        pygame.init()
+        """Construct a dummy screen."""
+        pygame.init()  # pylint: disable=no-member
 
-        self.canvas = pygame.Surface((width, height))
+        self.canvas = pygame.Surface((width, height))  # pylint: disable=too-many-function-args
         self._display = pygame.display.set_mode(
             (width * SCALING, height * SCALING))
         pygame.display.set_caption('infopanel test screen')
@@ -39,6 +38,7 @@ class DummyScreen(display.Display):
 
     @brightness.setter
     def brightness(self, value):
+        """Set the brightness."""
         self._brightness = value
 
     def text(self, font, x, y, red, green, blue, text):
@@ -55,7 +55,7 @@ class DummyScreen(display.Display):
     def set_image(self, image, x=0, y=0):
         """Apply an image to the screen."""
         raise NotImplementedError
-        myimage = pygame.image.load("myimage.bmp")
+        myimage = pygame.image.load("myimage.bmp")  # pylint: disable=unreachable
         imagerect = myimage.get_rect()
         self.canvas.blit(myimage, imagerect)
 

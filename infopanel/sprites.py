@@ -15,7 +15,6 @@ import voluptuous as vol
 
 from infopanel import helpers, colors, data
 
-
 MAX_TICKS = 10000
 GOOFY_EXCLAMATIONS = ['OW', 'HI', 'YUM', 'WOO', 'YES', 'CRAP', 'DANG', 'WHOOPS',
                       'YIKES', 'BYE', 'DAMN', 'SHIT', 'LOOK', 'NAY', 'YAWN', 'WHAT',
@@ -28,7 +27,8 @@ PALLETE_SCHEMA = vol.Schema({vol.Any(int, str): list})
 FRAMES_SCHEMA = vol.Schema([str])
 LOG = logging.getLogger(__name__)
 
-class Sprite(object):  # pylint: disable=too-many-instance-attributes
+
+class Sprite:  # pylint: disable=too-many-instance-attributes
     """A thing that may be animated or not, and may move or not."""
 
     CONF = vol.Schema({vol.Optional('dx', default=0): int,
@@ -204,7 +204,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         Reverse back to first frame if all have been seen.
 
         If ``reverse_frame_loop`` is ``False``, then this just loops the frames
-        continuously."""
+        continuously.
+        """
         if len(self.frames) == 1:
             self._frame_delta = 0
         elif self.reverse_frame_loop and self._frame_num == len(self.frames) - 1:
@@ -531,6 +532,7 @@ class Plant(Sprite):
         self.ticks_per_frame = random.randint(10, 20)
         self.pallete = {1: (0, 240, 0),
                         2: (165, 42, 42)}
+
 
 class BaseImage(Sprite):
     """Abstract image."""

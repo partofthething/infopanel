@@ -8,11 +8,10 @@ except ImportError:
     print('No RGB Matrix library found. Cannot use that display.')
     RGBMatrix = None
 
-
 from infopanel import colors
 
 
-class Display(object):
+class Display:
     """
     A display screen.
 
@@ -125,7 +124,7 @@ class RGBMatrixDisplay(Display):
 def rgbmatrix_options_factory(config):
     """Build RGBMatrix options object."""
     options = RGBMatrixOptions()
-    if config['led-gpio-mapping'] != None:
+    if config['led-gpio-mapping'] is not None:
         options.hardware_mapping = config['led-gpio-mapping']
     options.rows = config['led-rows']
     options.chain_length = config['led-chain']
@@ -135,7 +134,7 @@ def rgbmatrix_options_factory(config):
     options.pwm_lsb_nanoseconds = config['led-pwm-lsb-nanoseconds']
     if config['led-show-refresh']:
         options.show_refresh_rate = 1
-    if config['led-slowdown-gpio'] != None:
+    if config['led-slowdown-gpio'] is not None:
         options.gpio_slowdown = config['led-slowdown-gpio']
     if config['led-no-hardware-pulse']:
         options.disable_hardware_pulsing = True
@@ -151,7 +150,7 @@ def display_factory(config):
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)
     elif 'DummyMatrix' in config:
-        from infopanel.tests import dummy_screen
+        from infopanel.tests import dummy_screen  # pylint: disable=cyclic-import
         display = dummy_screen.DummyScreen()
     else:
         raise ValueError('Unknown Display options. Check config file.')

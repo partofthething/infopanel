@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class Driver(object):  # pylint: disable=too-many-instance-attributes
+class Driver:  # pylint: disable=too-many-instance-attributes
     """Main controller for the infopanel."""
 
     def __init__(self, disp, data_source):

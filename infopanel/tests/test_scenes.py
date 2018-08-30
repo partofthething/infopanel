@@ -1,4 +1,5 @@
 """Test Scenes."""
+
 import unittest
 
 from infopanel import scenes, sprites
@@ -36,6 +37,7 @@ def build_test_scenes(sprites_here):
     SCENE_CONFIG = {'traffic':{'type':'Scene', 'sprites':[{'I90':{'x':0, 'y':8}},  # pylint:disable=invalid-name
                                                           {'I90':{'x':0, 'y':16}}]}}
     return scenes.scene_factory(64, 32, SCENE_CONFIG, sprites_here)
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
