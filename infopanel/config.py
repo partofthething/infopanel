@@ -35,6 +35,7 @@ SCENES = vol.Schema({str: {vol.Optional('type', default='Scene'): vol.Any(*SCENE
 MODES = vol.Schema({str: list})
 
 RGBMATRIX = vol.Schema({'led-rows': int,
+                        vol.Optional('led-cols', default=32): int,
                         'led-chain': int,
                         'led-parallel': int,
                         'led-pwm-bits': vol.All(int, vol.Range(min=1, max=11)),

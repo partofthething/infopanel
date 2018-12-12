@@ -41,7 +41,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.active_scene = None
         self._stop = threading.Event()
         self.interval = 2
-        # just used to detect changes in data. Should be handeled on data.
+        # just used to detect changes in data. Should be handled on data.
         self._brightness = 100
 
     def run(self):
