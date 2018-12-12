@@ -127,6 +127,7 @@ def rgbmatrix_options_factory(config):
     if config['led-gpio-mapping'] is not None:
         options.hardware_mapping = config['led-gpio-mapping']
     options.rows = config['led-rows']
+    options.cols = config['led-cols']
     options.chain_length = config['led-chain']
     options.parallel = config['led-parallel']
     options.pwm_bits = config['led-pwm-bits']
