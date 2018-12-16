@@ -29,7 +29,6 @@ class Scene(object):
 
     def apply_config(self, conf, existing_sprites):
         """Apply optional extra config."""
-        pass
 
     def reinit(self):
         """Reinitialize when scene comes back up on the screen."""

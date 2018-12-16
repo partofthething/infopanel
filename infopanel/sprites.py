@@ -274,7 +274,6 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
         You could reset position or whatever here.
         """
-        pass
 
 
 class FancyText(Sprite):
@@ -554,7 +553,6 @@ class BaseImage(Sprite):
 
     def flip_horizontal(self):
         """Images can't flip... yet."""
-        pass
 
 
 class Image(BaseImage):

@@ -27,15 +27,34 @@ can come from all sorts of sources.
     Your browser does not support the video tag.
     </video> 
 
-It works with only one display so far, but more will be added if desired:
-
-* `RPI-RGB-led-matrix <https://github.com/hzeller/rpi-rgb-led-matrix>`_.
+It works with only one display so far, but more will be added if desired.
 
 
 Installing it
 -------------
+To install, first install the dependencies:
 
-Directly from source::
+* `RPI-RGB-LED-MATRIX  <https://github.com/hzeller/rpi-rgb-led-matrix>`_
+
+You may also need to run::
+
+    sudo apt-get install libyaml-dev
+
+We recommend running in a `virtual environment
+<https://virtualenv.pypa.io/en/latest/>`_ just to keep the infopanel
+environment from the rest of your system. If you want to do this optional step,
+run something like this (with a path of your choosing)::
+
+    python -m virtualenv /path/to/infopanel-venv
+    source /path/to/infopanel-venv/bin/activate
+
+The source code is `hosted on github
+<https://github.com/partofthething/infopanel>`_. Grab it and install
+*infopanel*::
+
+    git clone https://github.com/partofthething/infopanel.git
+    cd infopanel
+    python setup.py install
 
 	git clone git@github.com:partofthething/infopanel.git
 	cd infopanel
@@ -50,12 +69,13 @@ Directly from source::
 Using it
 --------
 To use it you need to set up a configuration file that describes the screen, data sources, 
-and various sprites, scenes (collections of sprites), and modes (sets of scenes).
+and various sprites, scenes (collections of sprites), and modes (sets of scenes). If you
+have a MQTT server for command and control you can point to it. Otherwise, skip that section.
 
 .. code:: yaml
 
     mqtt:
-      broker: test.com
+      broker: yourserver.com
       port: 8883
       client_id: screen
       keepalive: 60

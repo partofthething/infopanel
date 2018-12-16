@@ -45,7 +45,9 @@ RGBMATRIX = vol.Schema({'led-rows': int,
                         'led-pwm-lsb-nanoseconds': int,
                         'led-show-refresh': bool,
                         'led-slowdown-gpio': vol.All(int, vol.Range(min=0, max=2)),
-                        'led-no-hardware-pulse': bool})
+                        'led-no-hardware-pulse': bool,
+                        vol.Optional('led-pixel-mapper', default='') : str,
+                        })
 
 GLOBAL = vol.Schema({'font_dir': str,
                      'default_mode': str,

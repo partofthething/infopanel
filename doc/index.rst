@@ -2,13 +2,16 @@
 infopanel
 =========
 
-*Infopanel* puts live data, simple custom animations, images, animated gifs, headlines, 
-anything on a simple display panel. It currently works with a Raspberry Pi and 
-an RGB LED Matrix Screen (though other screens are envisioned to be supported in the future). 
+*Infopanel* puts live data, simple custom animations, images, animated gifs,
+headlines, anything on a simple display panel. It currently works with a
+Raspberry Pi and an RGB LED Matrix Screen (though other screens are envisioned
+to be supported in the future). 
 
 .. Note: I'm storing the videos as symlinks instead of embedding them in this repo. 
 
-Here is an example with live travel times over I-90 and WA-520, as well as high, low, and current temperature (in celcius). (The headlines are coming directly from reddit, as you'll see below). 
+Here is an example with live travel times over I-90 and WA-520, as well as
+high, low, and current temperature (in celcius). (The headlines are coming
+directly from reddit, as you'll see below). 
 
 .. raw:: html
 
@@ -25,34 +28,52 @@ To install, first install the dependencies:
 
 * `RPI-RGB-LED-MATRIX  <https://github.com/hzeller/rpi-rgb-led-matrix>`_
 
-The source code is `hosted on github <https://github.com/partofthething/infopanel>`_. Grab it and install *infopanel*::
+You may also need to run::
 
-    git clone git@github.com:partofthething/infopanel.git
+    sudo apt-get install libyaml-dev
+
+We recommend running in a `virtual environment
+<https://virtualenv.pypa.io/en/latest/>`_ just to keep the infopanel
+environment from the rest of your system. If you want to do this optional step,
+run something like this (with a path of your choosing)::
+
+    python -m virtualenv /path/to/infopanel-venv
+    source /path/to/infopanel-venv/bin/activate
+
+The source code is `hosted on github
+<https://github.com/partofthething/infopanel>`_. Grab it and install
+*infopanel*::
+
+    git clone https://github.com/partofthething/infopanel.git
     cd infopanel
     python setup.py install
 
-You can probably also just download the zip file if you don't have git. 
-
-
 Configuration
 -------------
-You now have to add information to the configuration file. You have to set up your screen, a data source, some sprites (animated things or text), some scenes (collections of sprites), and some modes (lists of alternating scenes). Make a text file called `ledmatrix.yaml` (or whatever) and add sections to it. 
+You now have to add information to the configuration file. You have to set up
+your screen, a data source, some sprites (animated things or text), some scenes
+(collections of sprites), and some modes (lists of alternating scenes). Make a
+text file called `ledmatrix.yaml` (or whatever) and add sections to it. 
 
 
 .. highlight:: yaml
 
 
-Note: There is a `full example configuration file available for your reference <https://github.com/partofthething/infopanel/blob/master/infopanel/tests/test_config.yaml>`_. 
+Note: There is a `full example configuration file available for your reference
+<https://github.com/partofthething/infopanel/blob/master/infopanel/tests/test_config.yaml>`_. 
 
 
 Display screen
 ^^^^^^^^^^^^^^
-The infopanel screen has to be set up. Right now only RPI-RGB-LED-MATRIX screens are supported. Configuration reflects the configuration from that library. 
+The infopanel screen has to be set up. Right now only RPI-RGB-LED-MATRIX
+screens are supported. Configuration reflects the configuration from that
+library. 
 
 Example::
 
     RGBMatrix:
       led-rows: 32
+      led-cols: 32
       led-chain: 2
       led-parallel: 1
       led-pwm-bits: 11
@@ -63,20 +84,28 @@ Example::
       led-show-refresh: false
       led-slowdown-gpio: 0
       led-no-hardware-pulse: false
+      led-pixel-mapper: ""
 
 
 MQTT
 ^^^^
-MQTT is a lightweight message-passing protocol. You can use it to get live data and/or control commands into your infopanel. For instance, if you have `home-assistant <https://home-assistant.io>`_ running and it has a temperature sensor, you can have it use MQTT to send the temperature information to infopanel for display. 
+MQTT is a lightweight message-passing protocol. You can use it to get live data
+and/or control commands into your infopanel. For instance, if you have
+`home-assistant <https://home-assistant.io>`_ running and it has a temperature
+sensor, you can have it use MQTT to send the temperature information to
+infopanel for display. 
 
 
-Before any of the MQTT stuff works, you need to configure it. You can have a MQTT server (like mosquitto) running locally on your Pi or on any other machine you have access to. If you're using home-assistant, you can basically duplicate the configuration to here. 
+Before any of the MQTT stuff works, you need to configure it. You can have a
+MQTT server (like mosquitto) running locally on your Pi or on any other machine
+you have access to. If you're using home-assistant, you can basically duplicate
+the configuration to here.
 
 
 Example::
 
    mqtt:
-       broker: test.com
+       broker: yourserver.com
        port: 8883
        client_id: screen
        keepalive: 60
@@ -89,7 +118,9 @@ Example::
 
 Sprites
 ^^^^^^^
-Sprites are the most fun part! You have a few builtin sprites to get you started, but the best part is making your own, pixel-by-pixel, and animating them. They can move around while being animated. 
+Sprites are the most fun part! You have a few builtin sprites to get you
+started, but the best part is making your own, pixel-by-pixel, and animating
+them. They can move around while being animated. 
 
 Here are some giraffes as an example:
 
@@ -123,28 +154,47 @@ You can define live MQTT text as a sprite. Here is a MQTT-text value that will r
           data_label: travel_time_i90
           label_color: purple
 
-That will be green if it's near 13 minutes and red if it's above 23 minutes. You can use this to tell yourself how long your commute will be, for example. 
+That will be green if it's near 13 minutes and red if it's above 23 minutes.
+You can use this to tell yourself how long your commute will be, for example. 
 
-Sprites have optional configuration values you can set that define their placement, motion, and animation. Here are some simple options:
+Sprites have optional configuration values you can set that define their
+placement, motion, and animation. Here are some simple options:
 
 * **x** -- starting x position of sprite (default=0)
 * **y** -- starting y position of sprite (default=0)
-* **dx** -- change in horizontal position per animation tick. Set to 1 for left-to-right motion. (default=0)
-* **dy** -- change in vertical position per animation tick. Set to 1 for top-to-bottom motion. (default=0)
-* **ticks_per_movement** -- number of ticks that go by before this moves by dx/dy. If you want it fast, make this 1. If you want it slower, increase the number. (default=1)
-* **ticks_per_frame** -- how many animation ticks go by before this changes to its next animation frame. For example, if you want your sprite to move 3 ticks before moving its legs, set this to 3. (default=1)
+* **dx** -- change in horizontal position per animation tick. Set to 1 for
+  left-to-right motion. (default=0) 
+* **dy** -- change in vertical position per
+  animation tick. Set to 1 for top-to-bottom motion. (default=0)
+* **ticks_per_movement** -- number of ticks that go by before this moves by
+  dx/dy. If you want it fast, make this 1. If you want it slower, increase the
+  number. (default=1) 
+* **ticks_per_frame** -- how many animation ticks go by
+  before this changes to its next animation frame. For example, if you want
+  your sprite to move 3 ticks before moving its legs, set this to 3.
+  (default=1)
 * **font_name**  -- font to use to display text. (default=5x8.bdf)
-* **phrases** -- phrases the sprite may have alongside itself. Useful for giving sprites snarky personality. 
-* **ticks_per_phrase** -- how many ticks go by before the sprite changes its phrase. This is only relevant for sprites that have phrases, like the Giraffe. Increase if you want them to change slower (default: 200). 
+* **phrases** -- phrases the sprite may have alongside itself. Useful for
+  giving sprites snarky personality.  
+* **ticks_per_phrase** -- how many ticks
+  go by before the sprite changes its
+  phrase. This is only relevant for sprites that have phrases, like the
+  Giraffe. Increase if you want them to change slower (default: 200).  
 * **text** -- Some text the sprite may say.
 
-There are some special configuration values a sprite may have as well to make things really fun. Here's where you can draw your own sprites pixel-by-pixel. The possibilities are endless!!
+There are some special configuration values a sprite may have as well to make
+things really fun. Here's where you can draw your own sprites pixel-by-pixel.
+The possibilities are endless!!
 
-**frames** are the fundamental config for a custom sprite. You fill in a grid of integers and draw out your shape. Each number can correspond to whatever color you choose. If you want a static sprite, make one frame. If you want it to be animated, make multiple frames. 
+**frames** are the fundamental config for a custom sprite. You fill in a grid
+of integers and draw out your shape. Each number can correspond to whatever
+color you choose. If you want a static sprite, make one frame. If you want it
+to be animated, make multiple frames. 
 
 **pallete** defines the actual RGB colors of each number you put in your frames. 
 
-Example custom animated horse sprite. If you squint you can kind of see the horse. It runs and hops.  (Try it out yourself!!)::
+Example custom animated horse sprite. If you squint you can kind of see the
+horse. It runs and hops.  (Try it out yourself!!)::
 
   horse:
       type: Sprite
@@ -198,7 +248,10 @@ Example custom animated horse sprite. If you squint you can kind of see the hors
           0000110000000
                                                     
 
-The Reddit sprite is special. It can pull live postings directly from reddit. You have to configure access before you do this but `it's pretty easy <https://praw.readthedocs.io/en/latest/getting_started/quick_start.html>`_. The configuration in the sprites section of the configuration file looks like::
+The Reddit sprite is special. It can pull live postings directly from reddit.
+You have to configure access before you do this but `it's pretty easy
+<https://praw.readthedocs.io/en/latest/getting_started/quick_start.html>`_. The
+configuration in the sprites section of the configuration file looks like::
 
 
   headlines:
@@ -214,8 +267,6 @@ The Reddit sprite is special. It can pull live postings directly from reddit. Yo
      update_minutes: 10
 
 This will pull the latest 5 top postings in the three listed subreddits. Neat!
-
-     
 
 
 Scenes
@@ -294,15 +345,23 @@ Here are some scene definition examples, which include all the animations shown 
                y: 8
 
 
-The images are pointing to paths. If it's an animated gif it will be animated. The Giraffes scene shows a few Giraffes at once, running around with text annotation including a bunch of goofy exclamations, plus some actually-useful information defined by the sprites listed in the ``extra_phrases`` section. 
+The images are pointing to paths. If it's an animated gif it will be animated.
+The Giraffes scene shows a few Giraffes at once, running around with text
+annotation including a bunch of goofy exclamations, plus some actually-useful
+information defined by the sprites listed in the ``extra_phrases`` section. 
 
-Note that when your placing each sprite in the scene you can modify some of its attributes like ``dx``, ``x``, ``y``. You can even put multple of the same sprite in one scene with different attributes, as seen in the ``horse`` scene. 
+Note that when your placing each sprite in the scene you can modify some of its
+attributes like ``dx``, ``x``, ``y``. You can even put multple of the same
+sprite in one scene with different attributes, as seen in the ``horse`` scene. 
 
-Image files were made in The GIMP as binary bitmaps, though it might be possible to load full-scale images in that way.
+Image files were made in The GIMP as binary bitmaps, though it might be
+possible to load full-scale images in that way.
 
 Command and control
 -------------------
-There are several simple commands you can send to the *infopanel* via MQTT. The topics should be appended to the root topic defined in the MQTT configuration. Commands you can send are:
+There are several simple commands you can send to the *infopanel* via MQTT. The
+topics should be appended to the root topic defined in the MQTT configuration.
+Commands you can send are:
 
 =============== ==================    ===========================
 Topic           Payload               Description
@@ -313,11 +372,13 @@ brightness      0 to 100              Change screen brightness
 image_path      spritename=newpath    Update the path of an image
 =============== ==================    ===========================
 
-Set mode to ``blank`` to shut down the panel. Special mode ``all`` will cycle through all defined scenes.
+Set mode to ``blank`` to shut down the panel. Special mode ``all`` will cycle
+through all defined scenes.
 
 Integration with Home-Assistant
 -------------------------------
-You an integrate this with anything that supports MQTT. It's super conducive to home-assistant because:
+You an integrate this with anything that supports MQTT. It's super conducive to
+home-assistant because:
 
 a) it has its own MQTT server in case you don't want to bother with another one
 b) it already runs my whole house so I might as well control this with it too. 
@@ -370,8 +431,8 @@ Here is some home-assistant configuration to run this:
              payload_template: '{{ states.input_select.infopanel.state|lower }}'
 
 
-This works great and is very very epic. I have other automations to turn it off at night and stuff. 
-
+This works great and is very very epic. I have other automations to turn it off
+at night and stuff.
 
 
 Indices and tables
