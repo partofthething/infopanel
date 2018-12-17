@@ -45,7 +45,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                        vol.Optional('pallete', default={1: [255, 255, 255],
                                                         'text':[0, 255, 0],
                                                         'label':[255, 255, 0]}): PALLETE_SCHEMA,
-                       vol.Optional('frames', default=None): FRAMES_SCHEMA,
+                       vol.Optional('frames', default=[]): FRAMES_SCHEMA,
                        vol.Optional('text', default=''): str,
                        vol.Optional('can_flip', default=True): bool,
                        vol.Optional('reverse_frame_loop', default=True): bool})

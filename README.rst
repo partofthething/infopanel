@@ -38,7 +38,7 @@ To install, first install the dependencies:
 
 You may also need to run::
 
-    sudo apt-get install libyaml-dev
+    sudo apt-get install libyaml-dev python-setuptools git python-matplotlib
 
 We recommend running in a `virtual environment
 <https://virtualenv.pypa.io/en/latest/>`_ just to keep the infopanel

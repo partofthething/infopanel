@@ -139,6 +139,7 @@ def rgbmatrix_options_factory(config):
         options.gpio_slowdown = config['led-slowdown-gpio']
     if config['led-no-hardware-pulse']:
         options.disable_hardware_pulsing = True
+    options.led_pixel_mapper = config['led-pixel-mapper']
     return options
 
 

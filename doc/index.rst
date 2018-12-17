@@ -30,12 +30,13 @@ To install, first install the dependencies:
 
 You may also need to run::
 
-    sudo apt-get install libyaml-dev
+    sudo apt-get install libyaml-dev python-setuptools git python-matplotlib
 
-We recommend running in a `virtual environment
+We like running in a `virtual environment
 <https://virtualenv.pypa.io/en/latest/>`_ just to keep the infopanel
-environment from the rest of your system. If you want to do this optional step,
-run something like this (with a path of your choosing)::
+environment from the rest of your system. If you're not comfortable with
+virtual environments you may want to start out without this. If you want to do
+this optional step, run something like this (with a path of your choosing)::
 
     python -m virtualenv /path/to/infopanel-venv
     source /path/to/infopanel-venv/bin/activate
@@ -356,6 +357,29 @@ sprite in one scene with different attributes, as seen in the ``horse`` scene.
 
 Image files were made in The GIMP as binary bitmaps, though it might be
 possible to load full-scale images in that way.
+
+Autostart
+---------
+If you want infopanel to start automatically and you have a system
+that uses systemd, you can make a file like this (adjust paths accordingly)::
+
+    Description=Infopanel
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    User=root
+    ExecStart=/opt/venvs/infopanel-py27/bin/python -m infopanel --config=/home/pi/ledmatrix.yaml
+
+    [Install]
+    WantedBy=multi-user.target
+
+Save that in /etc/systemd/system/infopanel.service. Then run::
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable infopanel.service
+    sudo systemctl start infopanel.service
+
 
 Command and control
 -------------------
