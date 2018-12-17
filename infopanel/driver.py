@@ -87,7 +87,10 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
     def _check_for_command(self):
         """Process any incoming commands."""
         if self.data_source['mode'] != self._mode:
-            self.apply_mode(self.data_source['mode'])
+            success = self.apply_mode(self.data_source['mode'])
+            if not success:
+                # Invalid mode. Reset data source to avoid dead-locking.
+                self.data_source['mode'] = self._mode
 
         if self.data_source['brightness'] != self._brightness:
             try:
@@ -119,7 +122,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 self.durations_in_s[scene] = MODE_ALL_DURATION
             else:
                 LOG.error('Invalid mode: %s', mode)
-                return
+                return False
         else:
             self.scene_sequence = []
             for scene_name, duration in self.modes[mode]:
@@ -129,6 +132,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self._scene_iterator = itertools.cycle(self.scene_sequence)
         self._previous_mode = self._mode  # for suspend/resume
         self._mode = mode
+        return True
 
     def change_image_path(self, pathsetting):
         """
