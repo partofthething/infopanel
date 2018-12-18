@@ -85,7 +85,6 @@ Example::
       led-show-refresh: false
       led-slowdown-gpio: 0
       led-no-hardware-pulse: false
-      led-pixel-mapper: ""
 
 
 MQTT
