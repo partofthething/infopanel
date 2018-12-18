@@ -1,8 +1,10 @@
 """Helpers."""
 
 import datetime
+import logging
 import os
 
+LOG = logging.getLogger(__name__)
 
 FONTS = {}
 FONT_DIR = None
@@ -33,6 +35,8 @@ def load_font(name):
             font = graphics.Font()
             font.LoadFont(os.path.join(FONT_DIR, name))  # slow.
         except ImportError:
+            LOG.error('Could not load font %s because the rgbmatrix '
+                      'library is not found.', name)
             font = None
         FONTS[name] = font
     return font

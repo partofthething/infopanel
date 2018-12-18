@@ -1,4 +1,11 @@
-"""Dummy screen for testing in development using pygame."""
+"""
+Dummy screen for testing in development using pygame.
+
+This shows a graphical window on your computer instead
+of using a RGB matrix.
+
+Activate with ``DummyMatrix:`` your config file.
+"""
 import pygame
 
 from infopanel import display
@@ -15,7 +22,7 @@ class DummyScreen(display.Display):
 
         self.canvas = pygame.Surface((width, height))  # pylint: disable=too-many-function-args
         self._display = pygame.display.set_mode(
-            (width * SCALING, height * SCALING))
+            (self.width * SCALING, self.height * SCALING))
         pygame.display.set_caption('infopanel test screen')
         self.clock = pygame.time.Clock()
         self._brightness = 50
@@ -45,12 +52,12 @@ class DummyScreen(display.Display):
         """Render text in a font to a place on the screen in a certain color."""
         val = self.font.render(text, 0, (red, green, blue))
         width, _height = self.font.size(text)
-        self.canvas.blit(val, (x, y - self.font.get_height()))
+        self.canvas.blit(val, (x+1, y+1 - self.font.get_height()))
         return width
 
     def set_pixel(self, x, y, red, green, blue):
         """Set a pixel to a color."""
-        self.canvas.fill((red, green, blue), (x, y, 1, 1))
+        self.canvas.fill((red, green, blue), (x+1, y+1, 1, 1))
 
     def set_image(self, image, x=0, y=0):
         """Apply an image to the screen."""

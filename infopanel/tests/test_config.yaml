@@ -1,30 +1,31 @@
-mqtt:
-  broker: test.com
-  port: 8883
-  client_id: screen
-  keepalive: 60
-  username: user
-  password: pass
-  certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
-  protocol: 3.1
-  topic: house/screen/#
+#mqtt:
+#  broker: test.com
+#  port: 8883
+#  client_id: screen
+#  keepalive: 60
+#  username: user
+#  password: pass
+#  certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
+#  protocol: 3.1
+#  topic: house/screen/#
+#
+#RGBMatrix:
+#  led-rows: 32
+#  led-chain: 2
+#  led-parallel: 1
+#  led-pwm-bits: 11
+#  led-brightness: 100
+#  led-gpio-mapping: adafruit-hat-pwm
+#  led-scan-mode: 1
+#  led-pwm-lsb-nanoseconds: 130
+#  led-show-refresh: false
+#  led-slowdown-gpio: 0
+#  led-no-hardware-pulse: false
+DummyMatrix:
 
-RGBMatrix:
-  led-rows: 32
-  led-chain: 2
-  led-parallel: 1
-  led-pwm-bits: 11
-  led-brightness: 100
-  led-gpio-mapping: adafruit-hat-pwm
-  led-scan-mode: 1
-  led-pwm-lsb-nanoseconds: 130
-  led-show-refresh: false
-  led-slowdown-gpio: 0
-  led-no-hardware-pulse: false
-  
 sprites: 
   I90:
-      type: Duration    
+      type: Duration
       label: I90
       low_val: 13.0
       high_val: 23.0
@@ -56,11 +57,16 @@ sprites:
   vehicle:
       type: FancyText
       text: VROOM!
+      pallete:
+         text:
+            - 255
+            - 100
+            - 255
   scroll:
       type: FancyText
       text: OH YEAH!
       dx: -1
-      ticks_per_movement: 1      
+      ticks_per_movement: 1
   giraffe2:
       type: Sprite
       ticks_per_frame: 3
@@ -69,11 +75,11 @@ sprites:
          1: 
             - 255
             - 0
-            - 0  
+            - 0
          2: 
             - 0
             - 0
-            - 255  
+            - 255
       frames:
         - 00010
           00011
@@ -165,4 +171,3 @@ modes:
 
 global:
     font_dir: $RPI_RGB_LED_MATRIX/fonts
-        
