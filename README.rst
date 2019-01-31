@@ -35,6 +35,7 @@ Installing it
 To install, first install the dependencies:
 
 * `RPI-RGB-LED-MATRIX  <https://github.com/hzeller/rpi-rgb-led-matrix>`_
+* `RPI-RGB-LED-MATRIX python bindings  <https://github.com/hzeller/rpi-rgb-led-matrix/tree/master/bindings/python>`_
 
 You may also need to run::
 
@@ -118,6 +119,7 @@ have a MQTT server for command and control you can point to it. Otherwise, skip 
       morning: 
         - giraffes:
             duration: 15
+            brightness: 50
         - traffic:
             duration: 10 
 
@@ -134,4 +136,7 @@ and run (with sudo if using RGB matrix on a Raspberry Pi):
 
 There are a few animations built in (e.g. giraffes), but you will have lots of fun
 building your own sprites and animations. See ``tests/test_config.yaml`` for full examples of this. 
-    
+
+.. note:: If you set ``brightness`` in the mode section, it will constantly override any
+    adjustments you make via the MQTT controller. Leave it out for useful remote control.
+

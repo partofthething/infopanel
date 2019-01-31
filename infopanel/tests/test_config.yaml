@@ -166,8 +166,10 @@ modes:
   morning: 
     - giraffes:
         duration: 15
+        brightness: 70
     - traffic:
         duration: 10 
 
 global:
     font_dir: $RPI_RGB_LED_MATRIX/fonts
+    default_mode: morning

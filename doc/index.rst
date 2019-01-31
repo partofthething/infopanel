@@ -27,6 +27,7 @@ Installation
 To install, first install the dependencies:
 
 * `RPI-RGB-LED-MATRIX  <https://github.com/hzeller/rpi-rgb-led-matrix>`_
+* `RPI-RGB-LED-MATRIX python bindings  <https://github.com/hzeller/rpi-rgb-led-matrix/tree/master/bindings/python>`_
 
 You may also need to run::
 
@@ -357,6 +358,24 @@ sprite in one scene with different attributes, as seen in the ``horse`` scene.
 Image files were made in The GIMP as binary bitmaps, though it might be
 possible to load full-scale images in that way.
 
+Modes
+^^^^^
+You can configure modes, which are just different collections of scenes. You can have
+different scenes run for different durations and brightnesses::
+
+    modes: 
+      morning: 
+        - giraffes:
+            duration: 15
+            brightness: 70
+        - traffic:
+            duration: 10 
+            brightness: 50
+
+
+.. note:: If you set ``brightness`` in modes, it will always override anything you send
+    over MQTT. Leave the brightness lines above out if you want to adjust brightness remotely.
+
 Autostart
 ---------
 If you want infopanel to start automatically and you have a system
@@ -396,7 +415,8 @@ image_path      spritename=newpath    Update the path of an image
 =============== ==================    ===========================
 
 Set mode to ``blank`` to shut down the panel. Special mode ``all`` will cycle
-through all defined scenes.
+through all defined scenes. If you pass a scene name as mode, that scene will
+be displayed. 
 
 Integration with Home-Assistant
 -------------------------------
