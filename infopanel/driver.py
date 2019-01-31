@@ -32,6 +32,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         self.sprites = {}  # name: list of sprites
         self.scenes = {}  # name: scene
         self.durations_in_s = {}  # scene: seconds
+        self.brightnesses = {}  # scene: brightness percent
         self.scene_sequence = []
         self._scene_iterator = itertools.cycle(self.scene_sequence)
         self._randomize_scenes = ON
@@ -77,12 +78,15 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         else:
             new_scene = next(self._scene_iterator)
 
-        if new_scene is not self.active_scene:
+        if new_scene != self.active_scene:
+            LOG.debug('Switching to new scene: %s', new_scene)
             self.display.clear()
             new_scene.reinit()
-            LOG.debug('Switching to new scene: %s', new_scene)
-        self.active_scene = new_scene
-        self.interval = self.durations_in_s[self.active_scene]
+            if self.brightnesses[new_scene] is not None:
+                # allow brightness changes on scene change
+                self.display.brightness = self.brightnesses[new_scene]
+            self.active_scene = new_scene
+            self.interval = self.durations_in_s[new_scene]
 
     def _check_for_command(self):
         """Process any incoming commands."""
@@ -125,10 +129,11 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 return False
         else:
             self.scene_sequence = []
-            for scene_name, duration in self.modes[mode]:
+            for scene_name, duration, brightness in self.modes[mode]:
                 scene = self.scenes[scene_name]
                 self.scene_sequence.append(scene)
                 self.durations_in_s[scene] = duration
+                self.brightnesses[scene] = brightness
         self._scene_iterator = itertools.cycle(self.scene_sequence)
         self._previous_mode = self._mode  # for suspend/resume
         self._mode = mode
@@ -173,16 +178,20 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         for mode_name, scenelist in modeconf.items():
             self.modes[mode_name] = []
             for sceneinfo in scenelist:
-                for scene_name, durationinfo in sceneinfo.items():
+                for scene_name, scene_settings in sceneinfo.items():
                     self.modes[mode_name].append(
-                        (scene_name, durationinfo['duration']))
+                        (scene_name,
+                         scene_settings['duration'],
+                         scene_settings.get('brightness')
+                        )
+                    )
 
         self.modes[MODE_ALL] = []  # make a default catch-all mode.
         for scene_name in self.scenes:
             if scene_name in [scenes.SCENE_BLANK]:
                 # do not randomly cycle through the special blank scene.
                 continue
-            self.modes[MODE_ALL].append((scene_name, MODE_ALL_DURATION))
+            self.modes[MODE_ALL].append((scene_name, MODE_ALL_DURATION, self._brightness))
 
         default_mode = conf['global'].get('default_mode', MODE_ALL)
         self.apply_mode(default_mode)
