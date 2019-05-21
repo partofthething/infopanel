@@ -8,3 +8,5 @@ __pycache__
 infopanel.egg*
 .cache
 doc/_build
+*.swp
+.pytest_cache
