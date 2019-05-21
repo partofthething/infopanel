@@ -83,7 +83,6 @@ have a MQTT server for command and control you can point to it. Otherwise, skip 
       username: user
       password: pass
       certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
-      protocol: 3.1
       topic: house/screen/#
     
     RGBMatrix:

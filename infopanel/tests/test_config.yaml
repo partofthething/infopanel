@@ -1,14 +1,14 @@
-#mqtt:
-#  broker: test.com
-#  port: 8883
-#  client_id: screen
-#  keepalive: 60
-#  username: user
-#  password: pass
-#  certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
-#  protocol: 3.1
-#  topic: house/screen/#
-#
+mqtt:
+  broker: test.mosquitto.org
+  #port: 8883
+  port: 1883
+  client_id: screen
+  keepalive: 60
+  username: user
+  password: pass
+  #certificate: /etc/ssl/certs/DST_Root_CA_X3.pem
+  topic: house/screen/#
+
 #RGBMatrix:
 #  led-rows: 32
 #  led-chain: 2

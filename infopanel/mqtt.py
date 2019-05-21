@@ -31,7 +31,7 @@ class MQTTClient(object):
         """Connect to the MQTT server."""
         conf = self.conf
         LOG.info('Connecting to MQTT server at %s', conf['broker'])
-        self._client = mqtt.Client(conf['client_id'], protocol=conf['protocol'])
+        self._client = mqtt.Client(conf['client_id'])
         self._client.on_connect = self.on_connect
         self._client.on_message = self.on_message
         if conf.get('username'):
