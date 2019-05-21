@@ -82,9 +82,10 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             LOG.debug('Switching to new scene: %s', new_scene)
             self.display.clear()
             new_scene.reinit()
-            if self.brightnesses[new_scene] is not None:
+            brightness = self.brightnesses.get(new_scene)
+            if brightness is not None:
                 # allow brightness changes on scene change
-                self.display.brightness = self.brightnesses[new_scene]
+                self.display.brightness = brightness
             self.active_scene = new_scene
             self.interval = self.durations_in_s[new_scene]
 
