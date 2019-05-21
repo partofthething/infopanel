@@ -85,6 +85,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             brightness = self.brightnesses.get(new_scene)
             if brightness is not None:
                 # allow brightness changes on scene change
+                # None value indicates no change.
                 self.display.brightness = brightness
             self.active_scene = new_scene
             self.interval = self.durations_in_s[new_scene]
@@ -173,8 +174,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
     def init_modes(self, conf):
         """Process modes from configuration."""
         modeconf = conf['modes']
-        # blank mode for suspend
-        self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0)]
+        # blank mode for suspend. Use None brightness to keep constant
+        self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0, None)]
 
         for mode_name, scenelist in modeconf.items():
             self.modes[mode_name] = []
