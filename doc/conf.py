@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(os.path.join('..','infopanel')))
+sys.path.insert(0, os.path.abspath(os.path.join('..')))
 
 # -- General configuration ------------------------------------------------
 
@@ -30,7 +30,13 @@ sys.path.insert(0, os.path.abspath(os.path.join('..','infopanel')))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinxcontrib.apidoc',
 ]
+
+apidoc_module_dir = os.path.join('..',
+                                 'infopanel')
+apidoc_output_dir = 'api'
+apidoc_excluded_paths = ['tests']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

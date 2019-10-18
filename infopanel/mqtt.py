@@ -25,7 +25,13 @@ class MQTTClient(object):
         """Do callback for when MQTT receives a message."""
         LOG.debug("%s %s", msg.topic, str(msg.payload))
         key = msg.topic.split('/')[-1]
-        self._data_container[key] = msg.payload
+        # convert all payloads to str since they come in as b'' in Python3.
+        # The one setting that is an int auto-converts in driver.
+        if isinstance(msg.payload, bytes):
+            payload = msg.payload.decode()
+        else:
+            payload = msg.payload
+        self._data_container[key] = payload
 
     def start(self):
         """Connect to the MQTT server."""

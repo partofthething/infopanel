@@ -638,7 +638,7 @@ class Reddit(FancyText):
     def apply_config(self, conf):
         """Validate and apply configuration to this sprite."""
         conf = FancyText.apply_config(self, conf)
-        import praw  # pylint: disable=import-error
+        import praw  # pylint: disable=import-outside-toplevel, import-error
         self._praw = praw.Reddit(client_id=conf['client_id'],
                                  client_secret=conf['client_secret'],
                                  user_agent=conf['user_agent'])
