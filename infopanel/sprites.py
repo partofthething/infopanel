@@ -443,21 +443,16 @@ class Duration(DynamicFancyText):  # pylint:disable=too-many-instance-attributes
 class Temperature(Duration):
     """A temperature with color dependent on a high and low bound."""
 
-    # updating defaults in a schema is broken in voluptuous 0.9.3 but fixed in master.
-    # for now you will have to enter the lows and highs manually.
-    # low_val with two different defaults gets treated as two keys and config value gets destroyed.
-#     CONF = Duration.CONF.extend({vol.Optional('low_val', default=-15.0): vol.Coerce(float),
-#                                  vol.Optional('high_val', default=28.0): vol.Coerce(float),
-#                                  vol.Optional('label_fmt', default='{}'): str,
-#                                  vol.Optional('val_fmt', default='{:> .1f}'): str
-#                                  })
+    CONF = Duration.CONF.extend({vol.Optional('low_val', default=-15.0): vol.Coerce(float),
+                                 vol.Optional('high_val', default=28.0): vol.Coerce(float),
+                                 vol.Optional('label_fmt', default='{}'): str,
+                                 vol.Optional('val_fmt', default='{:> .1f}'): str
+                                 })
 
     def __init__(self, max_x, max_y, data_source=None):
         """Construct a sprite."""
         Duration.__init__(self, max_x, max_y, data_source)
         self.cmap = cm.jet  # pylint: disable=no-member
-        self.label_fmt = '{}'  # until voluptuous bug fix is released
-        self.val_fmt = '{:> .1f}'
 
     def _convert_data(self, val):
         try:
