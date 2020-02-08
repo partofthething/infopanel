@@ -31,7 +31,7 @@ def load_font(name):
     if font is None:
         # cache it
         try:
-            from rgbmatrix import graphics
+            from rgbmatrix import graphics # pylint: disable=import-outside-toplevel
             font = graphics.Font()
             font.LoadFont(os.path.join(FONT_DIR, name))  # slow.
         except ImportError:

@@ -153,7 +153,7 @@ def display_factory(config):
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)
     elif 'DummyMatrix' in config:
-        from infopanel.tests import dummy_screen  # pylint: disable=cyclic-import
+        from infopanel.tests import dummy_screen  # pylint: disable=import-outside-toplevel, cyclic-import
         display = dummy_screen.DummyScreen()
     else:
         raise ValueError('Unknown Display options. Check config file.')

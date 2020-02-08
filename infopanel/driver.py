@@ -9,6 +9,7 @@ import os
 import itertools
 
 from infopanel import mqtt, scenes, config, display, sprites, data
+from infopanel import helpers
 
 FRAME_DELAY_S = 0.005
 MODE_BLANK = 'blank'
@@ -213,7 +214,6 @@ def driver_factory(disp, data_src, conf):
 
 def apply_global_config(conf):
     """Apply config items that are global in nature."""
-    from infopanel import helpers
     helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
 
 
