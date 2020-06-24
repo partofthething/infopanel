@@ -39,14 +39,14 @@ To install, first install the dependencies:
 
 You may also need to run::
 
-    sudo apt-get install libyaml-dev python-setuptools git python-matplotlib
+    sudo apt-get install libyaml-dev python3-setuptools git python3-matplotlib
 
 We recommend running in a `virtual environment
 <https://virtualenv.pypa.io/en/latest/>`_ just to keep the infopanel
 environment from the rest of your system. If you want to do this optional step,
 run something like this (with a path of your choosing)::
 
-    python -m virtualenv /path/to/infopanel-venv
+    python3 -m venv /path/to/infopanel-venv
     source /path/to/infopanel-venv/bin/activate
 
 The source code is `hosted on github
@@ -55,11 +55,7 @@ The source code is `hosted on github
 
     git clone https://github.com/partofthething/infopanel.git
     cd infopanel
-    python setup.py install
-
-	git clone git@github.com:partofthething/infopanel.git
-	cd infopanel
-	python setup.py install
+    python3 setup.py install
 
 .. note::
 
@@ -130,7 +126,7 @@ and run (with sudo if using RGB matrix on a Raspberry Pi):
 
 .. code:: bash
 
-    sudo python -m infopanel --config ~/.infopanel/infopanel.yaml
+    sudo python3 -m infopanel --config ~/.infopanel/infopanel.yaml
     
 
 There are a few animations built in (e.g. giraffes), but you will have lots of fun
