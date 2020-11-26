@@ -20,10 +20,13 @@ class DummyScreen(display.Display):
         """Construct a dummy screen."""
         pygame.init()  # pylint: disable=no-member
 
-        self.canvas = pygame.Surface((width, height))  # pylint: disable=too-many-function-args
+        self.canvas = pygame.Surface(
+            (width, height)
+        )  # pylint: disable=too-many-function-args
         self._display = pygame.display.set_mode(
-            (self.width * SCALING, self.height * SCALING))
-        pygame.display.set_caption('infopanel test screen')
+            (self.width * SCALING, self.height * SCALING)
+        )
+        pygame.display.set_caption("infopanel test screen")
         self.clock = pygame.time.Clock()
         self._brightness = 50
         self.font = pygame.font.SysFont("courier", 9)
@@ -52,12 +55,12 @@ class DummyScreen(display.Display):
         """Render text in a font to a place on the screen in a certain color."""
         val = self.font.render(text, 0, (red, green, blue))
         width, _height = self.font.size(text)
-        self.canvas.blit(val, (x+1, y+1 - self.font.get_height()))
+        self.canvas.blit(val, (x + 1, y + 1 - self.font.get_height()))
         return width
 
     def set_pixel(self, x, y, red, green, blue):
         """Set a pixel to a color."""
-        self.canvas.fill((red, green, blue), (x+1, y+1, 1, 1))
+        self.canvas.fill((red, green, blue), (x + 1, y + 1, 1, 1))
 
     def set_image(self, image, x=0, y=0):
         """Apply an image to the screen."""
@@ -73,5 +76,6 @@ class DummyScreen(display.Display):
     def buffer(self):
         """Swap the off-display canvas/buffer with the on-display one and scale it."""
         pygame.transform.scale(
-            self.canvas, (self.width * SCALING, self.height * SCALING), self._display)
+            self.canvas, (self.width * SCALING, self.height * SCALING), self._display
+        )
         pygame.display.flip()

@@ -20,7 +20,7 @@ class TestScenes(unittest.TestCase):
 
     def test_factory(self):
         """Test the factory."""
-        scene = self.scenes['traffic']
+        scene = self.scenes["traffic"]
         self.assertIsInstance(scene, scenes.Scene)
         self.assertEqual(len(scene.sprites), 2)
         self.assertEqual(scene.sprites[0].x, 0)
@@ -28,14 +28,23 @@ class TestScenes(unittest.TestCase):
 
     def test_all(self):
         """Test all configured sprites."""
-        existing_sprites = sprites.sprite_factory(self.conf['sprites'], None, MockDisplay())
-        scenes.scene_factory(64, 32, self.conf['scenes'], existing_sprites)
+        existing_sprites = sprites.sprite_factory(
+            self.conf["sprites"], None, MockDisplay()
+        )
+        scenes.scene_factory(64, 32, self.conf["scenes"], existing_sprites)
 
 
 def build_test_scenes(sprites_here):
     """Build scenes for testing."""
-    SCENE_CONFIG = {'traffic':{'type':'Scene', 'sprites':[{'I90':{'x':0, 'y':8}},  # pylint:disable=invalid-name
-                                                          {'I90':{'x':0, 'y':16}}]}}
+    SCENE_CONFIG = {
+        "traffic": {
+            "type": "Scene",
+            "sprites": [
+                {"I90": {"x": 0, "y": 8}},  # pylint:disable=invalid-name
+                {"I90": {"x": 0, "y": 16}},
+            ],
+        }
+    }
     return scenes.scene_factory(64, 32, SCENE_CONFIG, sprites_here)
 
 

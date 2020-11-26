@@ -16,12 +16,50 @@ import voluptuous as vol
 from infopanel import helpers, colors, data
 
 MAX_TICKS = 10000
-GOOFY_EXCLAMATIONS = ['OW', 'HI', 'YUM', 'WOO', 'YES', 'CRAP', 'DANG', 'WHOOPS',
-                      'YIKES', 'BYE', 'DAMN', 'SHIT', 'LOOK', 'NAY', 'YAWN', 'WHAT',
-                      'WHY', 'GO', 'SAD', 'YAY', 'NUTS', 'NO', 'WOW', 'OOH', 'BOO',
-                      'BRAVO', 'CHEERS', 'G\'DAY', 'NICE', 'WEE', 'TATA', 'DUH',
-                      'DERP', 'MERP', 'YAH', 'HEY', 'HO', 'BOOP', 'HMM', 'YAYA', 'SUP',
-                      'BOP']
+GOOFY_EXCLAMATIONS = [
+    "OW",
+    "HI",
+    "YUM",
+    "WOO",
+    "YES",
+    "CRAP",
+    "DANG",
+    "WHOOPS",
+    "YIKES",
+    "BYE",
+    "DAMN",
+    "SHIT",
+    "LOOK",
+    "NAY",
+    "YAWN",
+    "WHAT",
+    "WHY",
+    "GO",
+    "SAD",
+    "YAY",
+    "NUTS",
+    "NO",
+    "WOW",
+    "OOH",
+    "BOO",
+    "BRAVO",
+    "CHEERS",
+    "G'DAY",
+    "NICE",
+    "WEE",
+    "TATA",
+    "DUH",
+    "DERP",
+    "MERP",
+    "YAH",
+    "HEY",
+    "HO",
+    "BOOP",
+    "HMM",
+    "YAYA",
+    "SUP",
+    "BOP",
+]
 PALLETE_SCHEMA = vol.Schema({vol.Any(int, str): list})
 
 FRAMES_SCHEMA = vol.Schema([str])
@@ -31,31 +69,42 @@ LOG = logging.getLogger(__name__)
 class Sprite(object):  # pylint: disable=too-many-instance-attributes
     """A thing that may be animated or not, and may move or not."""
 
-    CONF = vol.Schema({vol.Optional('dx', default=0): int,
-                       vol.Optional('dy', default=0): int,
-                       vol.Optional('ticks_per_frame', default=1): int,
-                       vol.Optional('ticks_per_movement', default=1): int,
-                       vol.Optional('ticks_per_phrase', default=200): int,
-                       vol.Optional('min_ticks_per_phrase', default=100): int,
-                       vol.Optional('max_ticks_per_phrase', default=400): int,
-                       vol.Optional('x', default=0): int,
-                       vol.Optional('y', default=0): int,
-                       vol.Optional('font_name', default='5x8.bdf'): str,
-                       vol.Optional('phrases', default=['']): list,
-                       vol.Optional('pallete', default={1: [255, 255, 255],
-                                                        'text':[0, 255, 0],
-                                                        'label':[255, 255, 0]}): PALLETE_SCHEMA,
-                       vol.Optional('frames', default=[]): FRAMES_SCHEMA,
-                       vol.Optional('text', default=''): str,
-                       vol.Optional('can_flip', default=True): bool,
-                       vol.Optional('reverse_frame_loop', default=True): bool})
+    CONF = vol.Schema(
+        {
+            vol.Optional("dx", default=0): int,
+            vol.Optional("dy", default=0): int,
+            vol.Optional("ticks_per_frame", default=1): int,
+            vol.Optional("ticks_per_movement", default=1): int,
+            vol.Optional("ticks_per_phrase", default=200): int,
+            vol.Optional("min_ticks_per_phrase", default=100): int,
+            vol.Optional("max_ticks_per_phrase", default=400): int,
+            vol.Optional("x", default=0): int,
+            vol.Optional("y", default=0): int,
+            vol.Optional("font_name", default="5x8.bdf"): str,
+            vol.Optional("phrases", default=[""]): list,
+            vol.Optional(
+                "pallete",
+                default={
+                    1: [255, 255, 255],
+                    "text": [0, 255, 0],
+                    "label": [255, 255, 0],
+                },
+            ): PALLETE_SCHEMA,
+            vol.Optional("frames", default=[]): FRAMES_SCHEMA,
+            vol.Optional("text", default=""): str,
+            vol.Optional("can_flip", default=True): bool,
+            vol.Optional("reverse_frame_loop", default=True): bool,
+        }
+    )
 
     def __init__(self, max_x, max_y, data_source=None):
         """Construct a sprite."""
         self.x, self.y = None, None
         self.max_x, self.max_y = max_x, max_y
         self._frame_num = 0
-        self._ticks = 0  # to allow slower changes of frames, could probably be itertools.cycle
+        self._ticks = (
+            0
+        )  # to allow slower changes of frames, could probably be itertools.cycle
         self.ticks_per_frame = None
         self.ticks_per_movement = None
         self.ticks_per_phrase = None
@@ -77,9 +126,15 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
 
     def __repr__(self):
         """Print out details of a sprite."""
-        return ('<{} at {}, {}. dx/dy: ({}, {}), size: ({}, {})>'
-                ''.format(self.__class__.__name__, self.x, self.y,
-                          self.dx, self.dy, self.max_x, self.max_y))
+        return "<{} at {}, {}. dx/dy: ({}, {}), size: ({}, {})>" "".format(
+            self.__class__.__name__,
+            self.x,
+            self.y,
+            self.dx,
+            self.dy,
+            self.max_x,
+            self.max_y,
+        )
 
     def apply_config(self, conf):
         """
@@ -95,9 +150,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             if getattr(self, key) is None:
                 # allow subclasses to force non-None attributes in their constructors
                 setattr(self, key, val)
-        self.font = helpers.load_font(conf['font_name'])
-        if conf['frames']:
-            self._build_frames(conf['frames'])
+        self.font = helpers.load_font(conf["font_name"])
+        if conf["frames"]:
+            self._build_frames(conf["frames"])
 
         return conf
 
@@ -112,7 +167,7 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
                     row.append(int(char))
                 frame.append(row)
             new_frames.append(frame)
-        LOG.info('Built custom frames for %s.', self)
+        LOG.info("Built custom frames for %s.", self)
         self.frames = new_frames
 
     def flip_horizontal(self):
@@ -249,7 +304,9 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             y = self.y + yi
             for xi, val in enumerate(row):
                 if val:
-                    red, green, blue = pallete[val]  # pylint: disable=unsubscriptable-object
+                    red, green, blue = pallete[
+                        val
+                    ]  # pylint: disable=unsubscriptable-object
                     display.set_pixel(x + xi, y, red, green, blue)
 
     def _render_phrase(self, display):
@@ -262,11 +319,16 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             if isinstance(self.text, Sprite):
                 self.text.x = xtext
                 self.text.y = ytext
-                self._phrase_width = self.text.render(display)  # pylint:disable=no-member
+                self._phrase_width = self.text.render(
+                    display
+                )  # pylint:disable=no-member
             else:
-                red, green, blue = self.pallete['text']  # pylint: disable=unsubscriptable-object
-                self._phrase_width = display.text(self.font, xtext, ytext,
-                                                  red, green, blue, self.text)
+                red, green, blue = self.pallete[
+                    "text"
+                ]  # pylint: disable=unsubscriptable-object
+                self._phrase_width = display.text(
+                    self.font, xtext, ytext, red, green, blue, self.text
+                )
 
     def reinit(self):
         """
@@ -294,7 +356,9 @@ class FancyText(Sprite):
         """Validate and apply configuration to this sprite."""
         conf = Sprite.apply_config(self, conf)
         if self.text:
-            self.add(self.text, self.pallete['text'])  # pylint: disable=unsubscriptable-object
+            self.add(
+                self.text, self.pallete["text"]
+            )  # pylint: disable=unsubscriptable-object
         return conf
 
     @property
@@ -348,12 +412,16 @@ class DynamicFancyText(FancyText):  # pylint:disable=too-many-instance-attribute
     ``Label: [value]``
     """
 
-    CONF = FancyText.CONF.extend({'label': vol.Coerce(str),
-                                  vol.Optional('data_label'): vol.Coerce(str),
-                                  vol.Optional('label_fmt', default='{}:'): str,
-                                  vol.Optional('val_fmt', default='{}'): str,
-                                  vol.Optional('label_color', default='yellow'): str,
-                                  vol.Optional('value_color', default='green'): str})
+    CONF = FancyText.CONF.extend(
+        {
+            "label": vol.Coerce(str),
+            vol.Optional("data_label"): vol.Coerce(str),
+            vol.Optional("label_fmt", default="{}:"): str,
+            vol.Optional("val_fmt", default="{}"): str,
+            vol.Optional("label_color", default="yellow"): str,
+            vol.Optional("value_color", default="green"): str,
+        }
+    )
 
     def __init__(self, max_x, max_y, data_source):
         """Construct a sprite."""
@@ -370,9 +438,11 @@ class DynamicFancyText(FancyText):  # pylint:disable=too-many-instance-attribute
     def apply_config(self, conf):
         """Validate and apply configuration to this sprite."""
         conf = FancyText.apply_config(self, conf)
-        if conf['data_label']:
+        if conf["data_label"]:
             # make this a callable function to enable live/updating data
-            self.value = lambda: self._convert_data(self.data_source[conf['data_label']])
+            self.value = lambda: self._convert_data(
+                self.data_source[conf["data_label"]]
+            )
         self._make_text()
         return conf
 
@@ -382,17 +452,23 @@ class DynamicFancyText(FancyText):  # pylint:disable=too-many-instance-attribute
     def _make_text(self):
         """Render the label and live value."""
         if self.label:
-            DynamicFancyText.add(self,
-                                 self.label_fmt.format(self.label),
-                                 colors.rgb_from_name(self.label_color))
-        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
+            DynamicFancyText.add(
+                self,
+                self.label_fmt.format(self.label),
+                colors.rgb_from_name(self.label_color),
+            )
+        val = (
+            self.value() if callable(self.value) else self.value
+        )  # pylint: disable=not-callable
         text = self.val_fmt.format(val)
         self.last_val = val
         DynamicFancyText.add(self, text, colors.rgb_from_name(self.value_color))
 
     def update_value(self):
         """Update, but only if the value has changed."""
-        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
+        val = (
+            self.value() if callable(self.value) else self.value
+        )  # pylint: disable=not-callable
         if val != self.last_val:
             # only do lookup when things change for speed.
             self.clear()
@@ -407,8 +483,12 @@ class DynamicFancyText(FancyText):  # pylint:disable=too-many-instance-attribute
 class Duration(DynamicFancyText):  # pylint:disable=too-many-instance-attributes
     """Text that renders a number (maybe a duration?) with a green-to-red color."""
 
-    CONF = DynamicFancyText.CONF.extend({vol.Optional('low_val', default=13.0):vol.Coerce(float),
-                                         vol.Optional('high_val', default=23.0): vol.Coerce(float)})
+    CONF = DynamicFancyText.CONF.extend(
+        {
+            vol.Optional("low_val", default=13.0): vol.Coerce(float),
+            vol.Optional("high_val", default=23.0): vol.Coerce(float),
+        }
+    )
 
     def __init__(self, max_x, max_y, data_source):
         """Construct a sprite."""
@@ -426,15 +506,23 @@ class Duration(DynamicFancyText):  # pylint:disable=too-many-instance-attributes
 
     def _make_text(self):
         """Make elements of a duration with label and text."""
-        DynamicFancyText.add(self,
-                             self.label_fmt.format(self.label),
-                             colors.rgb_from_name(self.label_color))
-        val = self.value() if callable(self.value) else self.value  # pylint: disable=not-callable
+        DynamicFancyText.add(
+            self,
+            self.label_fmt.format(self.label),
+            colors.rgb_from_name(self.label_color),
+        )
+        val = (
+            self.value() if callable(self.value) else self.value
+        )  # pylint: disable=not-callable
         if val is None:
-            color = colors.interpolate_color(self.low_val, self.low_val, self.high_val, self.cmap)
-            text = 'N/A'
+            color = colors.interpolate_color(
+                self.low_val, self.low_val, self.high_val, self.cmap
+            )
+            text = "N/A"
         else:
-            color = colors.interpolate_color(val, self.low_val, self.high_val, self.cmap)
+            color = colors.interpolate_color(
+                val, self.low_val, self.high_val, self.cmap
+            )
             text = self.val_fmt.format(val)
         self.last_val = val
         DynamicFancyText.add(self, text, color)
@@ -443,11 +531,14 @@ class Duration(DynamicFancyText):  # pylint:disable=too-many-instance-attributes
 class Temperature(Duration):
     """A temperature with color dependent on a high and low bound."""
 
-    CONF = Duration.CONF.extend({vol.Optional('low_val', default=-15.0): vol.Coerce(float),
-                                 vol.Optional('high_val', default=28.0): vol.Coerce(float),
-                                 vol.Optional('label_fmt', default='{}'): str,
-                                 vol.Optional('val_fmt', default='{:> .1f}'): str
-                                 })
+    CONF = Duration.CONF.extend(
+        {
+            vol.Optional("low_val", default=-15.0): vol.Coerce(float),
+            vol.Optional("high_val", default=28.0): vol.Coerce(float),
+            vol.Optional("label_fmt", default="{}"): str,
+            vol.Optional("val_fmt", default="{:> .1f}"): str,
+        }
+    )
 
     def __init__(self, max_x, max_y, data_source=None):
         """Construct a sprite."""
@@ -469,38 +560,45 @@ class Giraffe(Sprite):
         """Construct a sprite."""
         Sprite.__init__(self, max_x, max_y, data_source)
         self.ticks_per_frame = 3
-        self.pallete = {1: (255, 255, 0), 'text':[0, 255, 0]}
+        self.pallete = {1: (255, 255, 0), "text": [0, 255, 0]}
         self.dx = 1
-        self.phrases = [''] * 6 + GOOFY_EXCLAMATIONS + [helpers.day_of_week,
-                                                        helpers.time_now,
-                                                        helpers.date]
-        self.frames = [[[0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 1],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 1, 1, 0],
-                        [0, 1, 1, 1, 0],
-                        [1, 1, 1, 1, 0],
-                        [1, 0, 0, 1, 0],
-                        [1, 0, 0, 0, 1],
-                        [1, 0, 0, 0, 1]],
-
-                       [[0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 1],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 0, 1, 0],
-                        [0, 0, 1, 1, 0],
-                        [0, 1, 1, 1, 0],
-                        [1, 1, 1, 1, 0],
-                        [1, 0, 0, 1, 0],
-                        [1, 0, 0, 1, 0],
-                        [0, 1, 1, 0, 0]]]
+        self.phrases = (
+            [""] * 6
+            + GOOFY_EXCLAMATIONS
+            + [helpers.day_of_week, helpers.time_now, helpers.date]
+        )
+        self.frames = [
+            [
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 1],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [1, 1, 1, 1, 0],
+                [1, 0, 0, 1, 0],
+                [1, 0, 0, 0, 1],
+                [1, 0, 0, 0, 1],
+            ],
+            [
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 1],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 0, 1, 0],
+                [0, 0, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [1, 1, 1, 1, 0],
+                [1, 0, 0, 1, 0],
+                [1, 0, 0, 1, 0],
+                [0, 1, 1, 0, 0],
+            ],
+        ]
 
 
 class Plant(Sprite):
@@ -509,34 +607,38 @@ class Plant(Sprite):
     def __init__(self, max_x, max_y, data_source=None):
         """Construct a sprite."""
         Sprite.__init__(self, max_x, max_y, data_source)
-        self.frames = [[[0, 1, 1, 1, 1, 0],
-                        [1, 0, 0, 1, 0, 1],
-                        [1, 0, 2, 0, 0, 1],
-                        [0, 0, 2, 0, 0, 0],
-                        [0, 0, 2, 2, 0, 0],
-                        [0, 0, 2, 2, 0, 0]],
-
-                       [[1, 1, 1, 1, 1, 0],
-                        [1, 0, 0, 1, 0, 1],
-                        [0, 0, 0, 2, 1, 0],
-                        [0, 0, 0, 2, 0, 0],
-                        [0, 0, 2, 2, 0, 0],
-                        [0, 0, 2, 2, 0, 0]]]
+        self.frames = [
+            [
+                [0, 1, 1, 1, 1, 0],
+                [1, 0, 0, 1, 0, 1],
+                [1, 0, 2, 0, 0, 1],
+                [0, 0, 2, 0, 0, 0],
+                [0, 0, 2, 2, 0, 0],
+                [0, 0, 2, 2, 0, 0],
+            ],
+            [
+                [1, 1, 1, 1, 1, 0],
+                [1, 0, 0, 1, 0, 1],
+                [0, 0, 0, 2, 1, 0],
+                [0, 0, 0, 2, 0, 0],
+                [0, 0, 2, 2, 0, 0],
+                [0, 0, 2, 2, 0, 0],
+            ],
+        ]
 
         self.ticks_per_frame = random.randint(10, 20)
-        self.pallete = {1: (0, 240, 0),
-                        2: (165, 42, 42)}
+        self.pallete = {1: (0, 240, 0), 2: (165, 42, 42)}
 
 
 class BaseImage(Sprite):
     """Abstract image."""
 
-    CONF = Sprite.CONF.extend({'path': vol.Coerce(str)})
+    CONF = Sprite.CONF.extend({"path": vol.Coerce(str)})
 
     def apply_config(self, conf):
         """Validate and apply configuration to this sprite."""
         conf = Sprite.apply_config(self, conf)
-        self.set_source_path(conf['path'])
+        self.set_source_path(conf["path"])
         return conf
 
     def _render_frame(self, display):
@@ -562,7 +664,7 @@ class Image(BaseImage):
         """Set this image source to a new path."""
         with PILImage.open(os.path.expandvars(path)) as image:
             image.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
-            self._image = image.convert('RGB')
+            self._image = image.convert("RGB")
 
     @property
     def frame(self):
@@ -589,7 +691,7 @@ class AnimatedGif(BaseImage):
         frames = [frame.copy() for frame in ImageSequence.Iterator(image)]
         for frame in frames:
             frame.thumbnail((self.max_x, self.max_y), PILImage.ANTIALIAS)
-        self.frames = [frame.convert('RGB') for frame in frames]
+        self.frames = [frame.convert("RGB") for frame in frames]
         self._frame_delta = 1
 
     def check_frame_bounds(self):
@@ -613,13 +715,16 @@ class AnimatedGif(BaseImage):
 class Reddit(FancyText):
     """The titles of some top posts in various subreddits."""
 
-    CONF = FancyText.CONF.extend({'client_id': str,
-                                  'client_secret': str,
-                                  vol.Optional('user_agent', default='infopanel'): str,
-                                  vol.Optional('subreddits',
-                                               default=['worldnews', 'politics', 'news']):list,
-                                  vol.Optional('num_headlines', default=5): int,
-                                  vol.Optional('update_minutes', default=5): int})
+    CONF = FancyText.CONF.extend(
+        {
+            "client_id": str,
+            "client_secret": str,
+            vol.Optional("user_agent", default="infopanel"): str,
+            vol.Optional("subreddits", default=["worldnews", "politics", "news"]): list,
+            vol.Optional("num_headlines", default=5): int,
+            vol.Optional("update_minutes", default=5): int,
+        }
+    )
 
     def __init__(self, *args, **kwargs):
         """Construct a sprite."""
@@ -634,9 +739,12 @@ class Reddit(FancyText):
         """Validate and apply configuration to this sprite."""
         conf = FancyText.apply_config(self, conf)
         import praw  # pylint: disable=import-outside-toplevel, import-error
-        self._praw = praw.Reddit(client_id=conf['client_id'],
-                                 client_secret=conf['client_secret'],
-                                 user_agent=conf['user_agent'])
+
+        self._praw = praw.Reddit(
+            client_id=conf["client_id"],
+            client_secret=conf["client_secret"],
+            user_agent=conf["user_agent"],
+        )
         self.update_headlines()
         return conf
 
@@ -644,19 +752,26 @@ class Reddit(FancyText):
         """Update sprite text based on current subreddit contents."""
         self.clear()
         try:
-            headlines = self._praw.subreddit(
-                '+'.join(self.subreddits)).hot(limit=self.num_headlines)
+            headlines = self._praw.subreddit("+".join(self.subreddits)).hot(
+                limit=self.num_headlines
+            )
             for headline in headlines:
-                self.add(headline.title + 10 * ' ', self.pallete['text'])  # pylint: disable=unsubscriptable-object
+                self.add(
+                    headline.title + 10 * " ", self.pallete["text"]
+                )  # pylint: disable=unsubscriptable-object
         except:  # pylint: disable=bare-except
             # possibly a connection error.
-            self.add('Headlines N/A', self.pallete['text'])  # pylint: disable=unsubscriptable-object
+            self.add(
+                "Headlines N/A", self.pallete["text"]
+            )  # pylint: disable=unsubscriptable-object
 
     def update_phrase(self):
         """Occasionally update the headlines."""
         if not self._ticks % self.ticks_per_phrase:
             now = datetime.datetime.now()
-            if now - self._last_update_time > datetime.timedelta(minutes=self.update_minutes):
+            if now - self._last_update_time > datetime.timedelta(
+                minutes=self.update_minutes
+            ):
                 self.update_headlines()
                 self._last_update_time = now
 
@@ -670,16 +785,20 @@ def sprite_factory(config, data_source, disp):
     for name, sprite_conf in config.items():
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
             try:
-                if sprite_conf['type'] == cls_name:
+                if sprite_conf["type"] == cls_name:
                     break
             except KeyError:
                 LOG.error("%s", name)
                 raise
         else:
-            raise ValueError('{} is invalid sprite'.format(name))
-        del sprite_conf['type']
-        sprite = cls(disp.width, disp.height, data_source=data_source)  # pylint:disable=undefined-loop-variable
+            raise ValueError("{} is invalid sprite".format(name))
+        del sprite_conf["type"]
+        sprite = cls(
+            disp.width, disp.height, data_source=data_source
+        )  # pylint:disable=undefined-loop-variable
         sprite.apply_config(sprite_conf)
-        sprites[name] = [sprite]  # track as list b/c copies will be added later and we track all.
-        LOG.debug('Build %s', sprite)
+        sprites[name] = [
+            sprite
+        ]  # track as list b/c copies will be added later and we track all.
+        LOG.debug("Build %s", sprite)
     return sprites

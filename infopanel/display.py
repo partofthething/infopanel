@@ -1,11 +1,12 @@
 """Displays to present stuff."""
 
 from matplotlib import cm
+
 try:
     from rgbmatrix import graphics
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 except ImportError:
-    print('No RGB Matrix library found. Cannot use that display.')
+    print("No RGB Matrix library found. Cannot use that display.")
     RGBMatrix = None
 
 from infopanel import colors
@@ -54,7 +55,8 @@ class Display(object):
         x_orig = x
         for i, char in enumerate(text):
             r, g, b = colors.interpolate_color(
-                float(i) / len(text), cmap=cm.gist_rainbow)  # pylint: disable=no-member
+                float(i) / len(text), cmap=cm.gist_rainbow
+            )  # pylint: disable=no-member
             x += self.text(font, x, y, r, g, b, char)
         if box:
             self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
@@ -124,20 +126,20 @@ class RGBMatrixDisplay(Display):
 def rgbmatrix_options_factory(config):
     """Build RGBMatrix options object."""
     options = RGBMatrixOptions()
-    if config['led-gpio-mapping'] is not None:
-        options.hardware_mapping = config['led-gpio-mapping']
-    options.rows = config['led-rows']
-    options.cols = config['led-cols']
-    options.chain_length = config['led-chain']
-    options.parallel = config['led-parallel']
-    options.pwm_bits = config['led-pwm-bits']
-    options.brightness = config['led-brightness']
-    options.pwm_lsb_nanoseconds = config['led-pwm-lsb-nanoseconds']
-    if config['led-show-refresh']:
+    if config["led-gpio-mapping"] is not None:
+        options.hardware_mapping = config["led-gpio-mapping"]
+    options.rows = config["led-rows"]
+    options.cols = config["led-cols"]
+    options.chain_length = config["led-chain"]
+    options.parallel = config["led-parallel"]
+    options.pwm_bits = config["led-pwm-bits"]
+    options.brightness = config["led-brightness"]
+    options.pwm_lsb_nanoseconds = config["led-pwm-lsb-nanoseconds"]
+    if config["led-show-refresh"]:
         options.show_refresh_rate = 1
-    if config['led-slowdown-gpio'] is not None:
-        options.gpio_slowdown = config['led-slowdown-gpio']
-    if config['led-no-hardware-pulse']:
+    if config["led-slowdown-gpio"] is not None:
+        options.gpio_slowdown = config["led-slowdown-gpio"]
+    if config["led-no-hardware-pulse"]:
         options.disable_hardware_pulsing = True
     # mapper not yet available in lib
     # options.led_pixel_mapper = config['led-pixel-mapper']
@@ -146,15 +148,18 @@ def rgbmatrix_options_factory(config):
 
 def display_factory(config):
     """Build a display based on config settings."""
-    if 'RGBMatrix' in config:
+    if "RGBMatrix" in config:
         if RGBMatrix is None:
             return Display()
-        options = rgbmatrix_options_factory(config['RGBMatrix'])
+        options = rgbmatrix_options_factory(config["RGBMatrix"])
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)
-    elif 'DummyMatrix' in config:
-        from infopanel.tests import dummy_screen  # pylint: disable=import-outside-toplevel, cyclic-import
+    elif "DummyMatrix" in config:
+        from infopanel.tests import (
+            dummy_screen,
+        )  # pylint: disable=import-outside-toplevel, cyclic-import
+
         display = dummy_screen.DummyScreen()
     else:
-        raise ValueError('Unknown Display options. Check config file.')
+        raise ValueError("Unknown Display options. Check config file.")
     return display

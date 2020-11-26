@@ -10,7 +10,7 @@ import datetime
 from infopanel import sprites, helpers
 
 LOG = logging.getLogger(__name__)
-SCENE_BLANK = 'blank'
+SCENE_BLANK = "blank"
 
 
 class Scene(object):
@@ -50,11 +50,11 @@ class Welcome(Scene):
     def __init__(self, width, height):
         """Construct a scene."""
         Scene.__init__(self, width, height)
-        self.font = helpers.load_font('9x15B.bdf')
+        self.font = helpers.load_font("9x15B.bdf")
 
     def draw_frame(self, display):
         """Draw the welcome frame."""
-        display.rainbow_text(self.font, 5, 20, 'HELLO!')
+        display.rainbow_text(self.font, 5, 20, "HELLO!")
 
 
 class Time(Scene):
@@ -63,12 +63,12 @@ class Time(Scene):
     def __init__(self, width, height):
         """Construct a scene."""
         Scene.__init__(self, width, height)
-        self.font = helpers.load_font('9x15B.bdf')
+        self.font = helpers.load_font("9x15B.bdf")
 
     def draw_frame(self, display):
         """Draw the current time."""
         now = datetime.datetime.now()
-        display.rainbow_text(self.font, 5, 20, now.strftime('%I:%M %p'))
+        display.rainbow_text(self.font, 5, 20, now.strftime("%I:%M %p"))
 
 
 class Giraffes(Scene):
@@ -99,25 +99,28 @@ class Giraffes(Scene):
                 for extra_phrase in self._extra_phrases:
                     phrase_sprite = existing_sprites[extra_phrase][0]
                     sprite.phrases.extend(
-                        [phrase_sprite] * self._extra_phrase_frequency)
+                        [phrase_sprite] * self._extra_phrase_frequency
+                    )
 
 
-def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too-many-locals
+def scene_factory(
+    width, height, conf, existing_sprites
+):  # pylint: disable=too-many-locals
     """Build scenes from config."""
     scenes = {SCENE_BLANK: Blank(width, height)}  # alway add blank scene for suspend
     cls = None
     for name, scene_data in conf.items():  # pylint: disable=too-many-nested-blocks
         for cls_name, cls in inspect.getmembers(sys.modules[__name__]):
-            if scene_data['type'] == cls_name:
+            if scene_data["type"] == cls_name:
                 break
         else:
-            raise ValueError('{} is invalid active_scene'.format(name))
-        del scene_data['type']
-        if 'sprites' in scene_data:
-            sprites_to_add = scene_data.pop('sprites')
+            raise ValueError("{} is invalid active_scene".format(name))
+        del scene_data["type"]
+        if "sprites" in scene_data:
+            sprites_to_add = scene_data.pop("sprites")
         else:
             sprites_to_add = []
-        LOG.debug('Initializing %s', cls)
+        LOG.debug("Initializing %s", cls)
         scene = cls(width, height, **scene_data)
         for sprite_data in sprites_to_add:
             for spritename, spriteparams in sprite_data.items():  # should be only one
@@ -125,13 +128,14 @@ def scene_factory(width, height, conf, existing_sprites):  # pylint: disable=too
                 # can set different custom config for each sprite (location,
                 # direction, color...)
                 sprite = copy.copy(existing_sprites[spritename][0])
-                existing_sprites[spritename].append(
-                    sprite)  # track the copies by name
+                existing_sprites[spritename].append(sprite)  # track the copies by name
                 if spriteparams is not None:
                     for param, val in spriteparams.items():
                         if not hasattr(sprite, param):
-                            raise ValueError('Invalid sprite parameter for {}: {}'
-                                             ''.format(sprite, param))
+                            raise ValueError(
+                                "Invalid sprite parameter for {}: {}"
+                                "".format(sprite, param)
+                            )
                         setattr(sprite, param, val)
             scene.sprites.append(sprite)
 

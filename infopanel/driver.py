@@ -12,11 +12,11 @@ from infopanel import mqtt, scenes, config, display, sprites, data
 from infopanel import helpers
 
 FRAME_DELAY_S = 0.005
-MODE_BLANK = 'blank'
-MODE_ALL = 'all'
+MODE_BLANK = "blank"
+MODE_ALL = "all"
 MODE_ALL_DURATION = 5  # 5 second default scene duration.
-ON = '1'  # for MQTT processing
-OFF = '0'
+ON = "1"  # for MQTT processing
+OFF = "0"
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -27,7 +27,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, disp, data_source):
         """Construct infopanel driver."""
-        LOG.info('Starting InfoPanel.')
+        LOG.info("Starting InfoPanel.")
         self.display = disp
         self.data_source = data_source
         self.sprites = {}  # name: list of sprites
@@ -80,7 +80,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             new_scene = next(self._scene_iterator)
 
         if new_scene != self.active_scene:
-            LOG.debug('Switching to new scene: %s', new_scene)
+            LOG.debug("Switching to new scene: %s", new_scene)
             self.display.clear()
             new_scene.reinit()
             brightness = self.brightnesses.get(new_scene)
@@ -99,27 +99,27 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         -----
         This must be fast.
         """
-        if self.data_source['mode'] != self._mode:
-            success = self.apply_mode(self.data_source['mode'])
+        if self.data_source["mode"] != self._mode:
+            success = self.apply_mode(self.data_source["mode"])
             if not success:
                 # Invalid mode. Reset data source to avoid dead-locking.
-                self.data_source['mode'] = self._mode
+                self.data_source["mode"] = self._mode
             self._change_scene()
 
-        if self.data_source['brightness'] != self._brightness:
+        if self.data_source["brightness"] != self._brightness:
             try:
-                self._brightness = int(self.data_source['brightness'])
+                self._brightness = int(self.data_source["brightness"])
             except TypeError:
                 self._brightness = 100
             self.display.brightness = self._brightness
 
-        if self.data_source['random'] != self._randomize_scenes:
-            self._randomize_scenes = self.data_source['random']
+        if self.data_source["random"] != self._randomize_scenes:
+            self._randomize_scenes = self.data_source["random"]
 
-        if self.data_source['image_path']:
-            self.change_image_path(self.data_source['image_path'])
+        if self.data_source["image_path"]:
+            self.change_image_path(self.data_source["image_path"])
             # clear it out in anticipation of next command.
-            self.data_source['image_path'] = ''
+            self.data_source["image_path"] = ""
 
     def apply_mode(self, mode):
         """
@@ -127,7 +127,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
         If the mode is the name of a scene, set that scene instead.
         """
-        LOG.info('Applying mode: %s', mode)
+        LOG.info("Applying mode: %s", mode)
         if mode not in self.modes:
             if mode in self.scenes:
                 # allow mode names to be any scene name to get just that mode.
@@ -135,7 +135,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 self.scene_sequence = [scene]
                 self.durations_in_s[scene] = MODE_ALL_DURATION
             else:
-                LOG.error('Invalid mode: %s', mode)
+                LOG.error("Invalid mode: %s", mode)
                 return False
         else:
             self.scene_sequence = []
@@ -156,22 +156,22 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
         The pathsetting is a special string in the form: spritename=newpath.
         """
         try:
-            sprite_name, new_path = pathsetting.split('=')
+            sprite_name, new_path = pathsetting.split("=")
         except ValueError:
             LOG.error(
-                'Path change string %s invalid. Format: spritename=newpath', pathsetting)
+                "Path change string %s invalid. Format: spritename=newpath", pathsetting
+            )
             return
         sprites_of_name = self.sprites.get(sprite_name)
-        LOG.debug('Setting %s path to %s', sprite_name, new_path)
+        LOG.debug("Setting %s path to %s", sprite_name, new_path)
         if not sprites_of_name:
-            LOG.warning('No sprite named %s to modify.', sprite_name)
+            LOG.warning("No sprite named %s to modify.", sprite_name)
             return
         try:
             for sprite in sprites_of_name:
                 sprite.set_source_path(new_path)
         except AttributeError:
-            LOG.warning(
-                'The %s sprite cannot have its path modified.', sprite_name)
+            LOG.warning("The %s sprite cannot have its path modified.", sprite_name)
 
     def draw_frame(self):
         """Perform a double-buffered draw frame and frame switch."""
@@ -181,7 +181,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
     def init_modes(self, conf):
         """Process modes from configuration."""
-        modeconf = conf['modes']
+        modeconf = conf["modes"]
         # blank mode for suspend. Use None brightness to keep constant
         self.modes[MODE_BLANK] = [(scenes.SCENE_BLANK, 2.0, None)]
 
@@ -190,9 +190,10 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             for sceneinfo in scenelist:
                 for scene_name, scene_settings in sceneinfo.items():
                     self.modes[mode_name].append(
-                        (scene_name,
-                         scene_settings['duration'],
-                         scene_settings.get('brightness')
+                        (
+                            scene_name,
+                            scene_settings["duration"],
+                            scene_settings.get("brightness"),
                         )
                     )
 
@@ -201,35 +202,42 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             if scene_name in [scenes.SCENE_BLANK]:
                 # do not randomly cycle through the special blank scene.
                 continue
-            self.modes[MODE_ALL].append((scene_name, MODE_ALL_DURATION, self._brightness))
+            self.modes[MODE_ALL].append(
+                (scene_name, MODE_ALL_DURATION, self._brightness)
+            )
 
-        default_mode = conf['global'].get('default_mode', MODE_ALL)
+        default_mode = conf["global"].get("default_mode", MODE_ALL)
         self.apply_mode(default_mode)
-        self.data_source['mode'] = default_mode
+        self.data_source["mode"] = default_mode
         self._change_scene()
 
 
 def driver_factory(disp, data_src, conf):
     """Build factory and add scenes and sprites."""
     driver = Driver(disp, data_src)
-    driver.sprites = sprites.sprite_factory(conf['sprites'], data_src, disp)
-    driver.scenes = scenes.scene_factory(disp.width, disp.height,
-                                         conf['scenes'], driver.sprites)
+    driver.sprites = sprites.sprite_factory(conf["sprites"], data_src, disp)
+    driver.scenes = scenes.scene_factory(
+        disp.width, disp.height, conf["scenes"], driver.sprites
+    )
     driver.init_modes(conf)
     return driver
 
 
 def apply_global_config(conf):
     """Apply config items that are global in nature."""
-    helpers.FONT_DIR = os.path.expandvars(conf['global']['font_dir'])
+    helpers.FONT_DIR = os.path.expandvars(conf["global"]["font_dir"])
 
 
 def run(conf_file=None):
     """Run the screen."""
     if not conf_file:
         parser = argparse.ArgumentParser()
-        parser.add_argument("--config", action="store", help="Point to a YAML configuration file.",
-                            default='/etc/infopanel/infopanel.yaml')
+        parser.add_argument(
+            "--config",
+            action="store",
+            help="Point to a YAML configuration file.",
+            default="/etc/infopanel/infopanel.yaml",
+        )
 
         args = parser.parse_args()
         conf_file = args.config
@@ -239,8 +247,8 @@ def run(conf_file=None):
     datasrc = data.InputData()
     infopanel = driver_factory(disp, datasrc, conf)
 
-    if conf.get('mqtt'):
-        client = mqtt.MQTTClient(datasrc, conf['mqtt'])
+    if conf.get("mqtt"):
+        client = mqtt.MQTTClient(datasrc, conf["mqtt"])
         client.start()
     else:
         client = None
@@ -250,7 +258,7 @@ def run(conf_file=None):
     finally:
         if client:
             client.stop()
-        LOG.info('Quitting.')
+        LOG.info("Quitting.")
 
 
 if __name__ == "__main__":
