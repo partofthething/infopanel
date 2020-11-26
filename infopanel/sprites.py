@@ -103,8 +103,8 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
         self.max_x, self.max_y = max_x, max_y
         self._frame_num = 0
         self._ticks = (
-            0
-        )  # to allow slower changes of frames, could probably be itertools.cycle
+            0  # to allow slower changes of frames, could probably be itertools.cycle
+        )
         self.ticks_per_frame = None
         self.ticks_per_movement = None
         self.ticks_per_phrase = None
@@ -304,28 +304,24 @@ class Sprite(object):  # pylint: disable=too-many-instance-attributes
             y = self.y + yi
             for xi, val in enumerate(row):
                 if val:
-                    red, green, blue = pallete[
-                        val
-                    ]  # pylint: disable=unsubscriptable-object
+                    # pylint: disable=unsubscriptable-object
+                    red, green, blue = pallete[val]
                     display.set_pixel(x + xi, y, red, green, blue)
 
     def _render_phrase(self, display):
         """Render optional follower phrase."""
         # you could try to make text a FancyText object but then you have to double-
         # render all the motion an wrapping. It's too slow so this is just dumb text.
+        # pylint: disable=unsubscriptable-object
         if self.text:
             xtext = self.x + self.width + 1
             ytext = self.y + self.font.height
             if isinstance(self.text, Sprite):
                 self.text.x = xtext
                 self.text.y = ytext
-                self._phrase_width = self.text.render(
-                    display
-                )  # pylint:disable=no-member
+                self._phrase_width = self.text.render(display)
             else:
-                red, green, blue = self.pallete[
-                    "text"
-                ]  # pylint: disable=unsubscriptable-object
+                red, green, blue = self.pallete["text"]
                 self._phrase_width = display.text(
                     self.font, xtext, ytext, red, green, blue, self.text
                 )
@@ -356,9 +352,8 @@ class FancyText(Sprite):
         """Validate and apply configuration to this sprite."""
         conf = Sprite.apply_config(self, conf)
         if self.text:
-            self.add(
-                self.text, self.pallete["text"]
-            )  # pylint: disable=unsubscriptable-object
+            # pylint: disable=unsubscriptable-object
+            self.add(self.text, self.pallete["text"])
         return conf
 
     @property
@@ -756,14 +751,12 @@ class Reddit(FancyText):
                 limit=self.num_headlines
             )
             for headline in headlines:
-                self.add(
-                    headline.title + 10 * " ", self.pallete["text"]
-                )  # pylint: disable=unsubscriptable-object
+                # pylint: disable=unsubscriptable-object
+                self.add(headline.title + 10 * " ", self.pallete["text"])
         except:  # pylint: disable=bare-except
             # possibly a connection error.
-            self.add(
-                "Headlines N/A", self.pallete["text"]
-            )  # pylint: disable=unsubscriptable-object
+            # pylint: disable=unsubscriptable-object
+            self.add("Headlines N/A", self.pallete["text"])
 
     def update_phrase(self):
         """Occasionally update the headlines."""
@@ -793,9 +786,8 @@ def sprite_factory(config, data_source, disp):
         else:
             raise ValueError("{} is invalid sprite".format(name))
         del sprite_conf["type"]
-        sprite = cls(
-            disp.width, disp.height, data_source=data_source
-        )  # pylint:disable=undefined-loop-variable
+        # pylint:disable=undefined-loop-variable
+        sprite = cls(disp.width, disp.height, data_source=data_source)
         sprite.apply_config(sprite_conf)
         sprites[name] = [
             sprite

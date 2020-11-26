@@ -54,9 +54,10 @@ class Display(object):
         """Make rainbow text."""
         x_orig = x
         for i, char in enumerate(text):
+            # pylint: disable=no-member
             r, g, b = colors.interpolate_color(
                 float(i) / len(text), cmap=cm.gist_rainbow
-            )  # pylint: disable=no-member
+            )
             x += self.text(font, x, y, r, g, b, char)
         if box:
             self.draw_box(x_orig - 2, y - font.height + 2, x, y + 2)
@@ -155,9 +156,10 @@ def display_factory(config):
         matrix = RGBMatrix(options=options)
         display = RGBMatrixDisplay(matrix)
     elif "DummyMatrix" in config:
+        # pylint: disable=import-outside-toplevel, cyclic-import
         from infopanel.tests import (
             dummy_screen,
-        )  # pylint: disable=import-outside-toplevel, cyclic-import
+        )
 
         display = dummy_screen.DummyScreen()
     else:

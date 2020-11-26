@@ -36,11 +36,12 @@ class TestScenes(unittest.TestCase):
 
 def build_test_scenes(sprites_here):
     """Build scenes for testing."""
+    # pylint:disable=invalid-name
     SCENE_CONFIG = {
         "traffic": {
             "type": "Scene",
             "sprites": [
-                {"I90": {"x": 0, "y": 8}},  # pylint:disable=invalid-name
+                {"I90": {"x": 0, "y": 8}},
                 {"I90": {"x": 0, "y": 16}},
             ],
         }

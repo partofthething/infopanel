@@ -43,11 +43,12 @@ class TestTemperature(unittest.TestCase):
 
 
 def build_test_sprites():
+    # pylint:disable=invalid-name
     DURATION_CONFIG = {
         "I90": {
             "type": "Duration",
             "label": "I90",
-            "low_val": 13.0,  # pylint:disable=invalid-name
+            "low_val": 13.0,
             "high_val": 25.0,
             "data_label": "travel_time_i90",
         }
