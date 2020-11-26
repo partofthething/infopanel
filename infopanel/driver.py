@@ -143,7 +143,9 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 scene = self.scenes[scene_name]
                 self.scene_sequence.append(scene)
                 self.durations_in_s[scene] = duration
-                self.brightnesses[scene] = brightness
+                self.brightnesses[scene] = (
+                    brightness if brightness is not None else self._brightness
+                )
         self._scene_iterator = itertools.cycle(self.scene_sequence)
         self._previous_mode = self._mode  # for suspend/resume
         self._mode = mode
@@ -203,7 +205,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
                 # do not randomly cycle through the special blank scene.
                 continue
             self.modes[MODE_ALL].append(
-                (scene_name, MODE_ALL_DURATION, self._brightness)
+                # None brightness indicates to keep it unchanged
+                (scene_name, MODE_ALL_DURATION, None)
             )
 
         default_mode = conf["global"].get("default_mode", MODE_ALL)
