@@ -3,6 +3,10 @@
 import inspect
 
 import yaml
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
 import voluptuous as vol
 
 from infopanel import sprites, scenes
@@ -65,7 +69,7 @@ SCHEMA = vol.Schema({'mqtt': MQTT,
 def load_config_yaml(path):
     """Load and validate config file as an alternative to command line options."""
     with open(path) as configfile:
-        config = yaml.load(configfile)
+        config = yaml.load(configfile, Loader=Loader)
     config = SCHEMA(config)
 
     return config
