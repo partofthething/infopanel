@@ -61,6 +61,7 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             if self._stop.isSet():
                 break
             self.draw_frame()
+            self._check_for_command()
             time.sleep(FRAME_DELAY_S)
             now = time.time()
             if now - interval_start > self.interval:
@@ -73,7 +74,6 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
 
     def _change_scene(self):
         """Switch to another active_scene, maybe."""
-        self._check_for_command()
         if self._randomize_scenes == ON:
             new_scene = random.choice(self.scene_sequence)
         else:
@@ -92,12 +92,19 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             self.interval = self.durations_in_s[new_scene]
 
     def _check_for_command(self):
-        """Process any incoming commands."""
+        """
+        Process any incoming commands.
+
+        Notes
+        -----
+        This must be fast.
+        """
         if self.data_source['mode'] != self._mode:
             success = self.apply_mode(self.data_source['mode'])
             if not success:
                 # Invalid mode. Reset data source to avoid dead-locking.
                 self.data_source['mode'] = self._mode
+            self._change_scene()
 
         if self.data_source['brightness'] != self._brightness:
             try:
