@@ -110,7 +110,8 @@ class Driver(object):  # pylint: disable=too-many-instance-attributes
             try:
                 self._brightness = int(self.data_source["brightness"])
             except TypeError:
-                self._brightness = 100
+                # leave brightness unchanged if it's e.g. a None
+                pass
             self.display.brightness = self._brightness
 
         if self.data_source["random"] != self._randomize_scenes:
